@@ -1,0 +1,27 @@
+:root {
+	--width:  99.8vw;
+	--height: 99.8vh;
+	--scrollbar-width: .75em;
+	--sidebar-padding-perc: .02;
+	--default-color: #7AB2F4;
+	--default-dark:  #1D2C3E;
+	--default-light: #FFFFFF;
+	--key-color:     #00FFFF;
+	--value-color:   #FF00EC;
+	--light-grey:    #676767;
+	--dark-grey:     #3F3F3F;
+	--sidebar-height: calc(var(--height) * .31); 
+	--main-height:    calc(var(--height) *.93);
+	--title-height:   calc(var(--height) *.07);
+	--sidebar-width:  calc(var(--width) * .25);
+	--main-width:     calc(var(--width) *.75); 
+	--chat-width:     var(--main-width);
+	--chat-height:    calc(var(--main-height) * .95);
+	--input-height:   calc(var(--main-height) * .05);
+	--sidebar-padding-height: calc(var(--sidebar-height) * var(--sidebar-padding-perc));
+	--sidebar-padding-width:  calc(var(--sidebar-width) * var(--sidebar-padding-perc)); 
+	--sidebar-internal-width: calc(var(--sidebar-width) - calc(var(--sidebar-padding-width)) * 2);
+	--sidebar-minor-height:   calc(var(--sidebar-height) * .1); 
+	--sidebar-major-height:   calc(calc(var(--sidebar-height) * .8) - calc(var(--sidebar-padding-height) * 2));
+}
+

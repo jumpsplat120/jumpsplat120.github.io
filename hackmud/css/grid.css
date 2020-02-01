@@ -1,0 +1,52 @@
+/*grid layout https://grid.layoutit.com/?id=9DaoWrH */
+
+/*The "copy code" does not work perfectly! Make sure
+  to go through the css and rename the template
+  areas and grid areas to the appropriate names     */
+
+.grid-body {
+	display: grid;
+	grid-template-columns: var(--main-width) var(--sidebar-width);
+	grid-template-rows: var(--title-height) var(--sidebar-height) var(--sidebar-height) var(--sidebar-height);
+	grid-template-areas: "tabs tabs" "chat usernames" "chat channels" "chat scripts";
+}
+
+.grid-tabs { grid-area: tabs; }
+
+.grid-chat {
+	display: grid;
+	grid-template-columns: var(--chat-width);
+	grid-template-rows: var(--chat-height) var(--input-height);
+	grid-template-areas: "chat-body" "chat-input";
+	grid-area: chat;
+}
+
+.grid-chat-body      { grid-area: chat-body; }
+
+.grid-chat-input     { grid-area: chat-input; }
+
+.grid-usernames {
+	display: grid;
+	grid-template-columns: var(--sidebar-internal-width);
+	grid-template-rows: var(--sidebar-minor-height) var(--sidebar-major-height) var(--sidebar-minor-height);
+	grid-template-areas: "username-title" "." "username-buttons";
+	grid-area: usernames;
+}
+
+.grid-username-title     { grid-area: username-title; }
+
+.grid-username-buttons   { grid-area: username-buttons; }
+
+.grid-channels {
+	display: grid;
+	grid-template-columns: var(--sidebar-internal-width);
+	grid-template-rows: var(--sidebar-minor-height) var(--sidebar-major-height) var(--sidebar-minor-height);
+	grid-template-areas: "channel-title" "." "channel-buttons";
+	grid-area: channels;
+}
+
+.grid-channel-title     { grid-area: channel-title; }
+
+.grid-channel-buttons   { grid-area: channel-buttons; }
+
+.grid-scripts { grid-area: scripts; }

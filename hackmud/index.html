@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+		<meta content="utf-8" http-equiv="encoding" />
+		<link rel="stylesheet" type="text/css" href="css/variables.css" />
+		<link rel="stylesheet" type="text/css" href="css/classes.css" />
+		<link rel="stylesheet" type="text/css" href="css/grid.css" />
+		<link rel="stylesheet" type="text/css" href="css/scrollbar.css" />
+		<link rel="stylesheet" type="text/css" href="css/font.css" />
+		<link rel="stylesheet" type="text/css" href="css/loading.css" />
+		<link rel="stylesheet" type="text/css" href="css/colors.css" />
+		<script src="js/polyfill.js"></script>
+		<script src="js/lib.js"></script>
+		<script src="js/init.js"></script>
+    </head>
+	<body class="clear body" oncontextmenu="return false;">
+		<div id="scanlines" class="overlay scanlines"></div>
+		<div id="noise" class="overlay noise"></div>
+		<div id="intro" class="fade invisible no-display"></div>
+		<div id="login" class="fade">
+			<div id="login-title" class="">
+					<video class="video video-left" autoplay muted loop src="assets/logo.webm#t=1.25"></video>
+					<div class="hm-title default-text">
+						<h1 class="clear">
+              ◢██◤                            ◢██◤
+             ◢██◤                            ◢██◤
+            ◢██◤                            ◢██◤
+           ◢██◤                            ◢██◤
+          ◢██◤                            ◢██◤
+         ◢██◤                            ◢██◤
+        ◢█████◣    ◢████████◤ ◢███████◤ ◢██◤ ◢██◤                 ◢██◤
+       ◢███████◣        ◢██◤ ◢██◤ ◢██◤ ◢███████◤                 ◢██◤
+      ◢██◤  ◢██◤ ◢████████◤ ◢██◤      ◢█████◣                   ◢██◤
+     ◢██◤  ◢██◤ ◢██◤  ███◤ ◢██◤ ◢██◤ ◢██◤◥███◣                 ◢██◤
+    ◢██◤  ◢██◤ ◢████████◤ ◢███████◤ ◢██◤  ◥███◣               ◢██◤
+                                                             ◢██◤
+                              ◢███◤ ◢███◤ ◢██◤  ◢██◤ ◢█████████◤
+                             ◢█████████◤ ◢██◤  ◢██◤ ◢██◤  ████◤
+                            ◢██◤◢█◤◢██◤ ◢██◤  ◢██◤ ◢██◤   ███◤
+                           ◢██◤   ◢██◤ ◢████████◤ ◢█████████◤
+                          ◢██◤   ◢██◤ ◢████████◤ ◢█████████◤
+						</h1>
+						<p class="clear color-b">webclient v1.0</p>
+					</div>
+					<video class="video video-right" autoplay muted loop src="assets/logo.webm"></video>
+			</div>
+			<div id="loading_animation" class="cssload-square fade invisible no-display">
+				<div class="cssload-square-part cssload-square-green"></div>
+				<div class="cssload-square-part cssload-square-pink"></div>
+				<div class="cssload-square-blend"></div>
+			</div>
+			<div id="password" class="fade input-wrapper default-text chat-input-wrapper">
+				<input id="password_container" class="clear input default-text chat-input" maxlength=6 autofocus=true onkeydown="submit_pass()" placeholder="input your chat_pass retrieved from ingame" />
+			</div>
+		</div>
+		<div id="main" class="grid-body fade invisible no-display">
+			<div id="tabs" class="grid-tabs tabs-container">
+				<input id="tabs_dflt" type="radio" name="tabs" class="no-display" checked />
+					<label for="tabs-dflt" class="default-text radio-label button button-choice" onpointerup="tabClick()">default_tab</label>
+				<button id="add_button" class="clear default-text button" onclick="addTab()">+</button>
+			</div>
+			<div id="chat" class="grid-chat">
+				<div id="chat_body" class="grid-chat-body chat-body">
+				</div>
+				<div id="chat_input_box" class="grid-chat-input">
+					<div class="default-text input-wrapper main-position">
+						<input id="chat_input" class="clear default-text input main-input" placeholder="enter a message..." onkeydown="chatInput()" />
+					</div>
+				</div>
+			</div>
+			<div id="usernames" class="grid-usernames main">
+				<div id="usernames_title" class="grid-username-title list-minor">
+					<h1 class="clear default-text color-test title">username</h1>
+				</div>
+				<hr class="divider" />
+				<div id="usernames_clip" class="clip-path">
+					<div id="usernames_scrollbar" class="scrollbar">
+						<div id="usernames_body" class="list-body">
+						</div>
+					</div>
+				</div>
+				<div id="usernames_buttons" class="grid-username-buttons list-minor buttons-container">
+					<input id="username_bl" type="radio" name="usernames" class="no-display" checked />
+						<label for="username_bl" class="default-text blacklist-label radio-label button button-choice" onclick="changeListType(true)"></label>
+					<input id="username_wl" type="radio" name="usernames" class="no-display" />
+						<label for="username_wl" class="default-text whitelist-label radio-label button" onclick="changeListType(true)"></label>
+					<button data-dflt="off" id="username_toggle" class="clear default-text button" onclick="toggleList()">off</button>
+				</div>
+			</div>
+			<div id="channels" class="grid-channels main">
+				<div id="channels_title" class="grid-channel-title list-minor">
+					<h1 class="clear default-text color-test title">channel</h1>
+				</div>
+				<hr class="divider" />
+				<div id="channels_clip" class="clip-path">
+					<div id="channels_scrollbar" class="scrollbar">
+						<div id="channels_body" class="list-body">
+							<p data-dflt class="clear default-text block">test_name_1</p>
+						</div>
+					</div>
+				</div>
+				<div id="channels_buttons" class="grid-channel-buttons list-minor buttons-container">
+					<input id="channel_bl" type="radio" name="channels" class="no-display" checked>
+						<label for="channel_bl" class="default-text blacklist-label radio-label button button-choice" onclick="changeListType(true)"></label>
+					<input id="channel_wl" type="radio" name="channels" class="no-display">
+						<label for="channel_wl" class="default-text whitelist-label radio-label button" onclick="changeListType(true)"></label>
+					<button data-dflt="off" id="channel_toggle" class="clear default-text button" onclick="toggleList()">off</button>
+				</div>
+			</div>
+			<div id="scripts" class="grid-scripts"></div>
+		</div>
+	</body>
+</html>

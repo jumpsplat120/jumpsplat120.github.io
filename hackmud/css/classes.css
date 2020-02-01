@@ -1,0 +1,347 @@
+/*------generalized elements-------*/
+
+/*clear all default styling*/
+.clear {
+	all: unset;
+}
+
+/*body element; all styling is done through div's to avoid confusion on styling location*/
+.body {
+	width:  var(--width);
+	height: var(--height);
+	overflow: hidden;
+	background-color: #0e0e0e;
+}
+
+/*default text color/font-size*/
+.default-text {
+	color: var(--default-color);
+	font-family: "White Rabbit";
+	text-shadow: 0 0 .25em;
+}
+
+/*makes element essentially not exist*/
+.no-display {
+	display: none !important;
+}
+
+/*Makes element hidden, but still exist*/
+.invisible {
+	opacity: 0;
+}
+
+.fade {
+	transition: .75s ease-out;
+}
+
+/*------overlay elements-------*/
+
+.overlay {
+	position: fixed;
+	width:    var(--width);
+	height:   var(--height);
+	overflow: hidden;
+	z-index:  8;
+	pointer-events: none;
+}
+
+.noise {
+	background-image: url("../assets/noise.png");
+	opacity: 7%;
+	height: 300%;
+	width: 300%;
+	animation: noise 2s steps(10) infinite;
+}
+
+@keyframes noise {
+	0%, 100% { transform: translate(0, 0); }
+	25% { transform:translate(-5%, -10%); }
+	50% { transform:translate(-10%, -10%); }
+	75% { transform:translate(-10%, -5%);  }
+}
+
+.scanlines {
+	background-image: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0, rgba(0,0,0,0) 0.05em, rgba(214,214,214,.5) 0.45em, rgba(0,0,0,0) .7em);
+    opacity: 12%;
+    mix-blend-mode: screen;
+}
+
+/*------sidebar elements-------*/
+
+/*main element styling*/
+.main {
+	position: relative;
+	padding-top: var(--sidebar-padding-height);
+	padding-left: var(--sidebar-padding-width);
+}
+
+/*outer title*/
+.list-minor {
+	position: relative;
+	width: var(--sidebar-internal-width);
+}
+
+/*inner title*/
+.title {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.25em;
+}
+
+/*mask element*/
+.clip-path {
+	position: absolute;
+    padding-top:  var(--sidebar-padding-height);
+	padding-left: var(--sidebar-padding-width);
+    width:        var(--sidebar-internal-width);
+    height:       calc(var(--sidebar-major-height) + calc(var(--sidebar-minor-height) * 2));
+	/*Oh no lol*/
+    clip-path: polygon(var(--sidebar-padding-width) var(--sidebar-padding-height), calc(var(--sidebar-padding-width) + var(--sidebar-internal-width)) var(--sidebar-padding-height), calc(var(--sidebar-padding-width) + var(--sidebar-internal-width)) calc(var(--sidebar-padding-height) + calc(var(--sidebar-major-height) + calc(var(--sidebar-minor-height) * 2))), calc(calc(var(--sidebar-padding-width) + var(--sidebar-internal-width)) - var(--scrollbar-width)) calc(var(--sidebar-padding-height) + calc(var(--sidebar-major-height) + calc(var(--sidebar-minor-height) * 2))), calc(calc(var(--sidebar-padding-width) + var(--sidebar-internal-width)) - var(--scrollbar-width)) calc(var(--sidebar-padding-height) + calc(var(--sidebar-major-height) + var(--sidebar-minor-height))), var(--sidebar-padding-width) calc(var(--sidebar-padding-height) + calc(var(--sidebar-major-height) + var(--sidebar-minor-height))), var(--sidebar-padding-width) calc(var(--sidebar-padding-height) + var(--sidebar-minor-height)), calc(calc(var(--sidebar-padding-width) + var(--sidebar-internal-width)) - var(--scrollbar-width)) calc(var(--sidebar-padding-height) + var(--sidebar-minor-height)), calc(calc(var(--sidebar-padding-width) + var(--sidebar-internal-width)) - var(--scrollbar-width)) var(--sidebar-padding-height));
+}
+
+/*fullsized element to stretch scrollbar*/
+.scrollbar {
+	position: relative;
+	height: 100%;
+	width:  100%;
+	overflow-y: scroll;
+}
+
+/*inner body element that contains all usernames/channels*/
+.list-body {
+	position: relative;
+    padding-top: 6.5vh;
+    top: -3.2vh;
+}
+
+.list-entry {
+	display: block;
+}
+
+/*------button elements-------*/
+
+.blacklist-label::before {
+	content: "blacklist";
+}
+
+.whitelist-label::before {
+	content: "whitelist";
+}
+
+@media (max-width:1280px) {
+	.blacklist-label::before {
+	content: "bl";
+	}
+
+	.whitelist-label::before {
+	content: "wl";
+	}
+}
+
+.buttons-container {
+	display: flex;
+	justify-content: space-evenly;
+}
+
+.button {
+	background-color: transparent;
+	border-radius: 17px;
+	color: var(--default-dark);
+	border: 4px solid var(--default-dark);
+	cursor: pointer;
+	padding: .125em .4em;
+	font-weight: bold;
+	transition: color .1s ease-in-out, border-color .1s ease-in-out;
+}
+
+/*They are slightly offset for some reason :shrug:*/
+.radio-label {
+	padding: .225em .4em;
+}
+
+.button-toggle {
+	color: var(--value-color);
+	border-color: var(--value-color);
+	padding: .125em .7em;
+}
+
+.button-choice {
+	color: var(--key-color);
+	border-color: var(--key-color);
+}
+
+.button-exit {
+	color: var(--dark-grey);
+}
+
+.button-exit[data-active] {
+	color: #96F6FF;
+}
+
+.button-exit[data-hover] {
+	color: var(--default-light);
+}
+
+.button-exit:hover {
+	color: var(--value-color);
+}
+
+.button:hover {
+	color: var(--default-color);
+	border-color: var(--default-color);
+}
+
+.button-toggle:hover {
+	color: #FF80E6;
+	border-color: #FF80E6;
+}
+
+.button-choice:hover {
+	color: #96F6FF;
+	border-color: #96F6FF;
+}
+
+.button:active {
+	color: var(--default-light);
+	border-color: var(--default-light);
+	position: relative;
+	top: 1px;
+}
+
+.tabs-container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+}
+
+/*------title elements-------*/
+
+.hm-title {
+	white-space: pre;
+    display: inline-block;
+    position: relative;
+    left: 200px;
+}
+
+.video {
+	position: fixed;
+	width: 500px;
+}
+
+.video-right {
+	left: 600px;
+	top: 100px;
+	clip-path: polygon(100% 0, 70% 0, 50% 100%, 100% 100%);
+}
+
+.video-left {
+	clip-path: polygon(0 0, 50% 0, 32% 100%, 0 100%);
+}
+
+/*------text box elements-------*/
+
+.input {
+	color:      var(--default-light);
+	background: transparent;
+}
+
+.input-measure {
+	height:   0;
+	position: absolute;
+	overflow: hidden;
+	white-space: pre;
+}
+
+.input::placeholder {
+	color: var(--light-grey);
+}
+
+.input-wrapper {
+	display: inline;
+}
+
+.input-wrapper::before {
+	color: var(--default-light);
+	content: ":";
+}
+
+.chat-input {
+	font-size: large;
+	width: 50%;
+}
+
+.chat-input-wrapper {
+	position: relative;
+	left: 40px;
+	top:  40px;
+}
+
+/*------main chat window elements-------*/
+
+.chat-body {
+	padding: 1%;
+	overflow-y: scroll;
+}
+
+.main-input {
+	width: 90%;
+}
+
+.main-position {
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.main-entry {
+	display: block;
+}
+
+/*-------common color overwrites-------*/
+
+.system {
+	color: #0070DD;
+}
+
+.alert {
+	color: #FFF404;
+}
+
+.error {
+	color: #FF0000;
+}
+
+.generic-item {
+	color: #676767;
+}
+
+.generic-name {
+	color: #FFFFFF;
+}
+
+.generic-tab {
+	color: #00FFFF;
+}
+
+/*-------common color overwrites-------*/
+
+.divider {
+	width: 80%;
+	height: 0;
+	position: absolute;
+	color: #2f77bc;
+	top: 9%;
+	border-color: #909ba5;
+	box-shadow: 0 0 5px 0px;
+	left: 7%;
+}
+
+/*------test elements-------*/
+
+/*easy div visualizing*/
+.debug {
+	border: 1px solid green;
+}
