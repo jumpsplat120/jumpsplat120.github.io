@@ -13,14 +13,18 @@
 		<link rel="stylesheet" type="text/css" href="css/colors.css" />
 		<script src="js/polyfill.js"></script>
 		<script src="js/lib.js"></script>
+		<script src="js/classStorage.js"></script>
+		<script src="js/classElement.js"></script>
+		<script src="js/classHackmudAPI.js"></script>
 		<script src="js/init.js"></script>
+		<script src="js/main.js"></script>
     </head>
 	<body class="clear body" oncontextmenu="return false;">
 		<div id="scanlines" class="overlay scanlines"></div>
 		<div id="noise" class="overlay noise"></div>
 		<div id="intro" class="fade invisible no-display"></div>
 		<div id="login" class="fade">
-			<div id="login-title" class="">
+			<div id="login-title" class="fade">
 					<video class="video video-left" autoplay muted loop src="assets/logo.webm#t=1.25"></video>
 					<div class="hm-title default-text">
 						<h1 class="clear">
@@ -46,19 +50,19 @@
 					</div>
 					<video class="video video-right" autoplay muted loop src="assets/logo.webm"></video>
 			</div>
-			<div id="loading_animation" class="cssload-square fade invisible no-display">
+			<div id="loading_animation" class="cssload-square loading fade invisible no-display">
 				<div class="cssload-square-part cssload-square-green"></div>
 				<div class="cssload-square-part cssload-square-pink"></div>
 				<div class="cssload-square-blend"></div>
 			</div>
 			<div id="password" class="fade input-wrapper default-text chat-input-wrapper">
-				<input id="password_container" class="clear input default-text chat-input" maxlength=6 autofocus=true onkeydown="submit_pass()" placeholder="input your chat_pass retrieved from ingame" />
+				<input id="password_container" class="clear input default-text chat-input" autofocus=true onkeydown="submitPass()" placeholder="input your chat_pass retrieved from ingame, or auth token" />
 			</div>
 		</div>
 		<div id="main" class="grid-body fade invisible no-display">
 			<div id="tabs" class="grid-tabs tabs-container">
 				<input id="tabs_dflt" type="radio" name="tabs" class="no-display" checked />
-					<label for="tabs-dflt" class="default-text radio-label button button-choice" onpointerup="tabClick()">default_tab</label>
+					<label for="tabs_dflt" class="default-text radio-label button button-choice" onpointerup="tabClick()">default_tab</label>
 				<button id="add_button" class="clear default-text button" onclick="addTab()">+</button>
 			</div>
 			<div id="chat" class="grid-chat">
@@ -97,7 +101,6 @@
 				<div id="channels_clip" class="clip-path">
 					<div id="channels_scrollbar" class="scrollbar">
 						<div id="channels_body" class="list-body">
-							<p data-dflt class="clear default-text block">test_name_1</p>
 						</div>
 					</div>
 				</div>

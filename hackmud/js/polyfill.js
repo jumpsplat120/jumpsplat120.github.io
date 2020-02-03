@@ -3,11 +3,20 @@ Object.defineProperty(HTMLInputElement.prototype, "label", { get: function() {
 	return this.labels[0] 
 }})
 
-//Access the first label of an input element (because why do you have more than one?)
+//Loop through each item in a HTMLCollection (EVERYTHING SHOULD HAVE A FOR EACH COME ON IT'S 2020)
 Object.defineProperty(HTMLCollection.prototype, "forEach", { value: function(callback, thisArg) { 
 	thisArg = thisArg || window;
 	for (var i = 0; i < this.length; i++) {
-		callback.call(thisArg, this[i], i, this);
+		callback.call(thisArg, this[i], i);
+	}
+}})
+
+//Loop through each item in an Object
+Object.defineProperty(Object.prototype, "forEach", { value: function(callback, thisArg) { 
+	thisArg = thisArg || window;
+	
+	for (var i = 0; i < Object.keys(this).length; i++) {
+		callback.call(thisArg, this[Object.keys(this)[i]], i);
 	}
 }})
 
@@ -39,4 +48,13 @@ Object.defineProperty(Array.prototype, "contains", { value: function(string) {
 //if the attribute exists or not
 Object.defineProperty(DOMStringMap.prototype, "hasFlag", { value: function(search) {
 	return this[search] !== undefined
+}})
+
+//Returns true if array is empty, otherwise returns false
+Object.defineProperty(Array.prototype, "isEmpty", { get: function() {
+	return this.length === 0
+}})
+
+Object.defineProperty(Array.prototype, "deduplicate", { value: function() {
+	return [... new Set(this)]
 }})

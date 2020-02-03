@@ -30,8 +30,9 @@
 	opacity: 0;
 }
 
+/*Fade transition effect*/
 .fade {
-	transition: .75s ease-out;
+	transition: .5s ease-in-out;
 }
 
 /*------overlay elements-------*/
@@ -223,7 +224,7 @@
 	white-space: pre;
     display: inline-block;
     position: relative;
-    left: 200px;
+    left: 150px;
 }
 
 .video {
@@ -232,13 +233,14 @@
 }
 
 .video-right {
-	left: 600px;
+	left: 550px;
 	top: 100px;
 	clip-path: polygon(100% 0, 70% 0, 50% 100%, 100% 100%);
 }
 
 .video-left {
 	clip-path: polygon(0 0, 50% 0, 32% 100%, 0 100%);
+	left: -50px;
 }
 
 /*------text box elements-------*/
@@ -337,6 +339,14 @@
 	border-color: #909ba5;
 	box-shadow: 0 0 5px 0px;
 	left: 7%;
+}
+
+/*-------misc-------*/
+
+.loading {
+	position: relative;
+    left: 250px;
+    top: 100px;
 }
 
 /*------test elements-------*/
