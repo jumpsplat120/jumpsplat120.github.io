@@ -1,7 +1,15 @@
-let j = {}
-
-j.getEl = name => {
-	return document.getElementById(name)
+class CoolestKatzLib {
+	constructor() {
+		
+	}
+	
+	getL(name) {
+		return document.getElementById(name)
+	}
+	
+	randomString(length = 4) {
+		return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, length)
+	}
 }
 
-j.randomString = length => { return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, length) }
+let j = new CoolestKatzLib()

@@ -1,7 +1,10 @@
-let storage = new Storage()
-let hmAPI   = new HackmudAPI()
+let storage, hmAPI, chat, builder
 
-let fade_ends, tutorial_run
+storage = new Storage()
+hmAPI   = new HackmudAPI()
+chat    = new Chat()
+builder = new ElementConstructor()
 
-fade_ends    = new Date().getTime()
-tutorial_run = false
+let fade_ends
+
+fade_ends   = new Date().getTime()

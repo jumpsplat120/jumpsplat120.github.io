@@ -1,8 +1,10 @@
 class HackmudAPI {
 	constructor(token, timecode, users, channels) {
 		this.http     = new XMLHttpRequest()
-		this.token    = undefined
-		this.timecode = undefined
+		this._        = {
+			token:    undefined,
+			timecode: undefined
+		}
 		this.users    = {
 			set main(value) {
 				if (this.all.contains(value)) {
@@ -12,9 +14,15 @@ class HackmudAPI {
 				}
 			},
 			get main() {
-				return this.primary
+				if (this._.main) {
+					return this._.main
+				} else {
+					throw new Error(`Unable to access main user, as no main user was set.`)
+				}
 			},
-			primary: undefined,
+			_: {
+				main: undefined
+			},
 			all: users
 		}
 		this.channels = {
@@ -26,11 +34,36 @@ class HackmudAPI {
 				}
 			},
 			get main() {
-				return this.primary
+				if (this._.main) {
+					return this._.main
+				} else {
+					throw new Error(`Unable to access main channel, as no main channel was set.`)
+				}
 			},
-			primary: undefined,
+			_: {
+				main: undefined,
+			},
 			all: channels
 		}
+	}
+	
+	set token(value)    { 
+		this._.token = value
+	}
+	set timecode(value) {
+		console.log(`Token is ${value}`)
+		this._.timecode = value
+	}
+	
+	get token() { 
+		if (this._.token) {
+			return this._.token
+		} else {
+			throw new Error(`Unable to access token as no token was ever set.`)
+		}
+	}	
+	get timecode() { 
+		return this._.timecode 
 	}
 	
 	openConnection(to) {
@@ -40,6 +73,11 @@ class HackmudAPI {
 	
 	sendData(obj) {
 		this.http.send(JSON.stringify(obj))
+	}
+	
+	requestToken(pass) {
+		this.openConnection("get_token")
+		this.sendData({ pass })
 	}
 	
 	requestChat() {
@@ -86,7 +124,7 @@ class HackmudAPI {
 			console.log(response.msg)
 		} else if (response.chat_token) {
 			localStorage.setItem("chat_token", response.chat_token)
-			j.chat_token = response.chat_token
+			this.token = response.chat_token
 			
 			getUsers()
 			//j.interval = setInterval(getNewChats, 1250)
@@ -105,7 +143,7 @@ class HackmudAPI {
 		} else if (response.chats) {
 			const j_log = response.chats["jumpsplat120"]
 			const a_log = response.chats["aiphos"]
-			const html  = j.getEl("default_chat").innerHTML
+			const html  = j.getL("default_chat").innerHTML
 			
 			if (j_log.length > 0 || a_log.length > 0) {			
 				const a_time = a_log[a_log.length - 1] ? a_log[a_log.length - 1].t : 0
@@ -119,7 +157,7 @@ class HackmudAPI {
 					const username  = obj.from_user
 					
 					const newline = `<p><span class="color_b">${getIngameTimestamp(obj.t)}</span> <span class="color_vv">${channel}</span> <span class ="color_${usernameColor(username)}">${username}</span><span class="color_b"> :::</span>${sanitizeString(obj.msg)}<span class="color_b">:::</span></p>`
-					getEl("default_chat").insertAdjacentHTML("beforeend", newline)
+					getL("default_chat").insertAdjacentHTML("beforeend", newline)
 				})
 			}
 			

@@ -43,13 +43,6 @@ Object.defineProperty(Array.prototype, "contains", { value: function(string) {
 	return match.length > 0 ? match : false
 }})
 
-//Returns true/false based on whether a dataset does or doesn't contain a data-attribute. This
-//will return true, regardless of the value of the attribute itself! This only checks to see
-//if the attribute exists or not
-Object.defineProperty(DOMStringMap.prototype, "hasFlag", { value: function(search) {
-	return this[search] !== undefined
-}})
-
 //Returns true if array is empty, otherwise returns false
 Object.defineProperty(Array.prototype, "isEmpty", { get: function() {
 	return this.length === 0
