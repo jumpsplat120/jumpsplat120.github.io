@@ -15,6 +15,8 @@
 		<script src="js/lib.js"></script>
 		<script src="js/classStorage.js"></script>
 		<script src="js/classElement.js"></script>
+		<script src="js/classGUI.js"></script>
+		<script src="js/classColoredText.js"></script>
 		<script src="js/classHackmudAPI.js"></script>
 		<script src="js/classChat.js"></script>
 		<script src="js/init.js"></script>
@@ -56,9 +58,11 @@
 				<div class="cssload-square-part cssload-square-pink"></div>
 				<div class="cssload-square-blend"></div>
 			</div>
+			<!--Not entirely sure why I'm using the chatinput classes for this; this is clearly not the chat input. Works anyways, no touchy-->
 			<div id="password" class="fade input-wrapper default-text chat-input-wrapper">
 				<input id="password_input" class="clear input default-text chat-input" autofocus=true placeholder="input your chat_pass retrieved from ingame, or auth token" />
 			</div>
+			<div id="password_error" class="fade invisible no-display default-text error password-error">the entered token or password was incorrect</div>
 		</div>
 		<div id="main" class="grid-body fade invisible no-display">
 			<div id="tabs" class="grid-tabs tabs-container">

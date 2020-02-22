@@ -27,6 +27,11 @@ Object.defineProperty(String.prototype, "toFragment", { value: function() {
 	return temp.content
 }})
 
+//Capitalize the first letter of a string
+Object.defineProperty(String.prototype, "toCapitalCase", { value: function() {
+	return this.charAt(0).toUpperCase() + this.slice(1)
+}})
+
 //Checks each element contains some part of the submitted string; this differs from .includes
 //which requires you to have the entire string as an element. If elements that are not strings
 //are passed as a parameter, then it will be converted to a string. If the submitted item is a
@@ -48,6 +53,7 @@ Object.defineProperty(Array.prototype, "isEmpty", { get: function() {
 	return this.length === 0
 }})
 
+//Remove duplicate items within an array
 Object.defineProperty(Array.prototype, "deduplicate", { value: function() {
 	return [... new Set(this)]
 }})

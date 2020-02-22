@@ -281,6 +281,13 @@
 	top:  40px;
 }
 
+/*error message*/
+.password-error {
+	position: relative;
+	top: 45px;
+    left: 60px;
+}
+
 /*------main chat window elements-------*/
 
 .chat-body {
@@ -326,6 +333,10 @@
 
 .generic-tab {
 	color: #00FFFF;
+}
+
+.generic-command {
+	color: #1EFF00;
 }
 
 /*-------common color overwrites-------*/

@@ -1,18 +1,27 @@
 class ElementConstructor {
-	constructor() {
-		this._ = {
-			element: undefined
+	constructor(element) {
+		if (element !== undefined) {
+			if (!this.isValidElement(element)) { throw new Error("Passed element was not a valid HTML element.") }
 		}
+		this._ = { element }
 	}
 	
 	isValidElement(element) {
-		return element.toString() != "[object HTMLUnknownElement]"
+		if (typeof element !== "object") { return false } else {
+			let string_name, regex
+			
+			string_name = element.toString()
+			regex = /\[object HTML[^U]?[^n]?[^k]?[^n]?[^o]?[^w]?[^n]?Element\]/
+
+			//We are looking for [object HTML{something}Element] but if {something} is 'Unknown' we want this to return false
+			return regex.test(string_name)
+		}
 	}
 	
 	isValidElementType(element_type) {
 		let div = document.createElement("div")
 		div.innerHTML = `<${element_type}></${element_type}>`.toFragment().childNodes[0]
-		return div.innerHTML.toString() != "[object HTMLUnknownElement]"
+		return div.innerHTML.toString() !== "[object HTMLUnknownElement]"
 	}
 	
 	get elementExists() {
@@ -32,14 +41,18 @@ class ElementConstructor {
 	}
 	
 	modifyExistingElement(element) {
-		if (this.elementExists) {
-			throw new Error("Element already exists within builder! Return the current element before creating a new one.")
-		} else {
-			if (this.isValidElement(element)) {
-				this._.element = element
+		if (element) {
+			if (this.elementExists) {
+				throw new Error("Element already exists within builder! Return the current element before creating a new one.")
 			} else {
-				throw new Error("Provided element was not a valid HTML Element.")
+				if (this.isValidElement(element)) {
+					this._.element = element
+				} else {
+					throw new Error("Provided element was not a valid HTML Element.")
+				}
 			}
+		} else {
+			throw new Error("No element was passed.")
 		}
 	}
 	
@@ -55,6 +68,14 @@ class ElementConstructor {
 		}
 	}
 	
+	addClasses(array) {
+		array = typeof array !== "array" ? arguments : array
+		
+		for (let i = 0; array.length > i; i++) {
+			this.addClass(array[i])
+		}
+	}
+	
 	removeClass(class_name) {
 		if (this.hasClass(class_name)) {
 			this.element.classList.remove(class_name)
@@ -63,8 +84,24 @@ class ElementConstructor {
 		}
 	}
 	
+	removeClasses(array) {
+		array = typeof array !== "array" ? arguments : array
+		
+		for (let i = 0; array.length > i; i++) {
+			this.removeClass(array[i])
+		}
+	}
+	
 	toggleClass(class_name) {
 		this.element.classList.toggle(class_name)
+	}
+	
+	toggleClasses(array) {
+		array = typeof array !== "array" ? arguments : array
+		
+		for (let i = 0; array.length > i; i++) {
+			this.toggleClass(array[i])
+		}
 	}
 	
 	hasAttribute(attr_name) {
@@ -259,6 +296,60 @@ class ElementConstructor {
 		}
 	}
 	
+	get childrenAmount() {
+		return this.element.children.length
+	}
+	
+	childExists(index) {
+		return this.element.children[index] !== undefined
+	}
+	
+	child(index) {
+		if (this.childExists(index)) {
+			return this.element.children[index]
+		} else {
+			throw new Error(`Unable to access child at index ${index}.`)
+		}
+	}
+	
+	addChild(element) {
+		this.element.appendChild(element)
+	}
+	
+	removeChild(index) {
+		if (this.childExists(index)) {
+			this.child.remove()
+		} else {
+			throw new Error(`Unable to remove child at index ${index}.`)
+		}
+	}
+	
+	get text() {
+		//innerText is more performant heavy, but is a more accurate representation of what is
+		//actually being shown in the document. However, not all Nodes use innerText. Therefore
+		//we want to use innerText if it exists, otherwise use textContent. However, textContent
+		//will ignore certain formatting, so it's important to throw an warn as it may provide
+		//undesired effects.
+		if (this.element.innerText !== undefined) {
+			return this.element.innerText
+		} else {
+			console.warn("Element does not contain .innerText; using .textContent as a fallback.")
+			return this.element.textContent
+		}
+	}
+	
+	get hasLabel() {
+		if (this.element.label !== undefined) { return true } else { return false }
+	}
+	
+	get labelText() {
+		if (this.hasLabel) {
+			return this.element.label.innerText
+		} else {
+			throw new Error("Element does have an assigned label.")
+		}
+	}
+	
 	get element() {
 		if (this.elementExists) {
 			return this._.element
@@ -267,7 +358,7 @@ class ElementConstructor {
 		}
 	}
 	
-	clearSavedElement() {
+	clear() {
 		if (this.elementExists) {
 			delete this._.element
 		} else {
@@ -278,7 +369,7 @@ class ElementConstructor {
 	get returnElement() {
 		if (this.elementExists) {
 			let element = this.element
-			this.clearSavedElement()
+			this.clear()
 			return element
 		} else {
 			throw new Error("Unable to return element, as no element currently exists.")
@@ -288,7 +379,7 @@ class ElementConstructor {
 	get returnElementAsText() {
 		if (this.elementExists) {
 			let element = this.element
-			this.clearSavedElement()
+			this.clear()
 			return element.outerHTML
 		} else {
 			throw new Error("Unable to return element, as no element currently exists.")

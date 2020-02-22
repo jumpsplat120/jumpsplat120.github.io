@@ -4,7 +4,7 @@ class CoolestKatzLib {
 	}
 	
 	getL(name) {
-		return document.getElementById(name)
+		return document.getElementById(name) || false
 	}
 	
 	randomString(length = 4) {

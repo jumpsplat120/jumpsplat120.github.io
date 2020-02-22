@@ -1,6 +1,9 @@
 class HackmudAPI {
 	constructor(token, timecode, users, channels) {
 		this.http     = new XMLHttpRequest()
+		this.interval   = null
+		this.response   = null
+		this.validation = false
 		this._        = {
 			token:    undefined,
 			timecode: undefined
@@ -47,11 +50,12 @@ class HackmudAPI {
 		}
 	}
 	
-	set token(value)    { 
+	set token(value)    {
+		console.log(`Token has been set as ${value}`)
 		this._.token = value
 	}
 	set timecode(value) {
-		console.log(`Token is ${value}`)
+		console.log(`Timecode is ${value}`)
 		this._.timecode = value
 	}
 	
@@ -66,6 +70,11 @@ class HackmudAPI {
 		return this._.timecode 
 	}
 	
+	validateToken() {
+		this.validation = true
+		this.requestUsers()
+	}
+	
 	openConnection(to) {
 		this.http.open("POST", "https://www.hackmud.com/mobile/" + to + ".json")
 		this.http.setRequestHeader("Content-Type","application/json")
@@ -76,6 +85,7 @@ class HackmudAPI {
 	}
 	
 	requestToken(pass) {
+		this.validation = true
 		this.openConnection("get_token")
 		this.sendData({ pass })
 	}
@@ -114,54 +124,91 @@ class HackmudAPI {
 		this.sendMessage(message, recipient)
 	}
 	
-	handleResponse() {
-		let response, date
+	receiveChatToken() {
+		this.validation = false
 		
-		response = this.http.readyState == this.http.DONE ? JSON.parse(this.http.response) : this.http.status
-		date     = new Date()
+		storage.save("chat_token", this.response.chat_token)
 		
-		if (response.ok === false) { 
-			console.log(response.msg)
-		} else if (response.chat_token) {
-			localStorage.setItem("chat_token", response.chat_token)
-			this.token = response.chat_token
+		this.token = this.response.chat_token
+		
+		this.requestUsers()
+	}
+	
+	receiveUsers() {
+		let channels = []
+		
+		this.users.all = Object.keys(this.response.users)
+		
+		this.response.users.forEach(channel => { channels.push(Object.keys(channel)) })
+		
+		this.channels.all = channels.deduplicate()
+		
+		console.log(`Users for this account: ${this.users.all.join(", ")}`)
+		console.log(`Channels for this account: ${this.channels.all.join(", ")}`)
+		
+		this.interval = setInterval(this.requestChat.bind(this), 1250)
+		
+		gooey.fadeOut("login")
+		gooey.fadeIn("main")
+	}
+	
+	//unfinished
+	receiveChat() {
+		//builder.modifyExistingElement(j.getL("default_chat"))
+		if (j_log.length > 0) {			
+			const a_time = a_log[a_log.length - 1] ? a_log[a_log.length - 1].t : 0
+			const j_time = j_log[j_log.length - 1] ? j_log[j_log.length - 1].t : 0
+			j.timecode = j_time > a_time ? j_time : a_time
+			const chat_log = a_log.concat(j_log)
+			chat_log.sort(function(a, b) { return a.t - a.b })
 			
-			getUsers()
-			//j.interval = setInterval(getNewChats, 1250)
-			
-			console.log(`Token is ${j.chat_token}`)
-			
-			fade("out", "login")
-			fade("in", "main")
-		} else if (response.users) {
-			j.users = Object.keys(response.users)
-			j.channels = []
-			response.users.forEach(channel => { j.channels.push(Object.keys(channel)) })
-			j.channels = j.channels.deduplicate()
-			console.log(`Users for this account are ${j.users}`)
-			console.log(`Channels for this account are ${j.channels}`)
-		} else if (response.chats) {
-			const j_log = response.chats["jumpsplat120"]
-			const a_log = response.chats["aiphos"]
-			const html  = j.getL("default_chat").innerHTML
-			
-			if (j_log.length > 0 || a_log.length > 0) {			
-				const a_time = a_log[a_log.length - 1] ? a_log[a_log.length - 1].t : 0
-				const j_time = j_log[j_log.length - 1] ? j_log[j_log.length - 1].t : 0
-				j.timecode = j_time > a_time ? j_time : a_time
-				const chat_log = a_log.concat(j_log)
-				chat_log.sort(function(a, b) { return a.t - a.b })
+			chat_log.forEach(obj => {
+				const channel   = obj.channel ? obj.channel : "from"
+				const username  = obj.from_user
 				
-				chat_log.forEach(obj => {
-					const channel   = obj.channel ? obj.channel : "from"
-					const username  = obj.from_user
-					
-					const newline = `<p><span class="color_b">${getIngameTimestamp(obj.t)}</span> <span class="color_vv">${channel}</span> <span class ="color_${usernameColor(username)}">${username}</span><span class="color_b"> :::</span>${sanitizeString(obj.msg)}<span class="color_b">:::</span></p>`
-					getL("default_chat").insertAdjacentHTML("beforeend", newline)
-				})
+				const newline = `<p><span class="color_b">${getIngameTimestamp(obj.t)}</span> <span class="color_vv">${channel}</span> <span class ="color_${usernameColor(username)}">${username}</span><span class="color_b"> :::</span>${sanitizeString(obj.msg)}<span class="color_b">:::</span></p>`
+				getL("default_chat").insertAdjacentHTML("beforeend", newline)
+			})
+		}
+		
+		j.timecode += .5
+	}
+	
+	handleResponse() {
+		this.response = this.http.readyState == 4 ? JSON.parse(this.http.response) : this.http.status
+		
+		if (this.response.ok === false) {
+			if (this.validation) {
+				gooey.fadeOut("loading_animation")
+				gooey.fadeInMultiple("password", "password_error")
+				
+				this.token = null
+				this.validation = false
+			} else {
+				throw new Error(this.response.msg.toCapitalCase())
 			}
+		} else if (this.response.chat_token) {
+			this.receiveChatToken()
+		} else if (this.response.users) {
+			if (this.validation) {
+				storage.save("chat_token", this.token)
+				this.validation = false
+			}
+			this.receiveUsers()
+		} else if (this.response.chats) {
+			this.receiveChat() 
+		}
+	}
+	
+	handleError() {
+		if (this.validation) {
+			gooey.fadeOut("loading_animation")
+			gooey.fadeInMultiple("password", "password_error")
 			
-			j.timecode += .5
+			this.token = null
+			this.validation = false
+		} else {
+			throw new Error("Yo some shit went down and your handle error function doesn't really handle anything other than token validation issues sooo....")
 		}
 	}
 }

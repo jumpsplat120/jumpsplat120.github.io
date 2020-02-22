@@ -1,8 +1,7 @@
 class Chat {
 	constructor() {
-		this._ = {}
-		
 		this.tutorial_has_run = false
+		this.tutorial_step    = -1
 	}
 	
 	get usernameL()          { return j.getL("usernames")         }
@@ -19,19 +18,36 @@ class Chat {
 	get channelsButtonsTL()  { return j.getL("channel_toggle")    }
 	get chatL()              { return j.getL("chat")              }
 	get chatsL()             { return j.getL("chat_body")         }
-	get tabsL()              { return j.getL("tabs")              }
+	get chatsInputL()        { return j.getL("chat_input")        }
+	get tabsL()              { return j.getL("tabs")              }	
+	get mainUser()			 { return hmAPI.users.main            }	
+	get mainChannel()		 { return hmAPI.channels.main         }
+	
+	set usernameL(x)          { j.getL("usernames").replaceWith(x)         }
+	set usernamesL(x)         { j.getL("usernames_body").replaceWith(x)    }
+	set usernamesButtonsL(x)  { j.getL("usernames_buttons").replaceWith(x) }
+	set usernamesButtonsWL(x) { j.getL("username_wl").replaceWith(x)       }
+	set usernamesButtonsBL(x) { j.getL("username_bl").replaceWith(x)       }
+	set usernamesButtonsTL(x) { j.getL("username_toggle").replaceWith(x)   }
+	set channelL(x)           { j.getL("channels").replaceWith(x)          }
+	set channelsL(x)          { j.getL("channels_body").replaceWith(x)     }
+	set channelsButtonsL(x)   { j.getL("channels_buttons").replaceWith(x)  }
+	set channelsButtonsWL(x)  { j.getL("channel_wl").replaceWith(x)        }
+	set channelsButtonsBL(x)  { j.getL("channel_bl").replaceWith(x)        }
+	set channelsButtonsTL(x)  { j.getL("channel_toggle").replaceWith(x)    }
+	set chatL(x)              { j.getL("chat").replaceWith(x)              }
+	set chatsL(x)             { j.getL("chat_body").replaceWith(x)         }
+	set chatsInputL(x)        { j.getL("chat_input").replaceWith(x)        }
+	set tabsL(x)              { j.getL("tabs").replaceWith(x)              }	
 	
 	getActiveFilter(type) {
 		if (builder) {
-			this[type + "ButtonsL"].children.forEach(element => { 
-			
-			builder.modifyExistingElement(element)
-			
-			if (builder.checked) { auf = builder.id.includes("wl") ? "whitelist" : "blacklist" }})
+			this[type + "ButtonsL"].children.forEach(element => {
+				let builder = new ElementConstructor()
 				
-			builder.clearSavedElement()
-			
-			return auf
+				builder.modifyExistingElement(element)
+				
+				if (builder.checked) { return builder.id.includes("wl") ? "whitelist" : "blacklist" }})
 		} else {
 			throw new Error("Missing an [object ElementConstructor] object called 'builder'.")
 		}
@@ -40,13 +56,13 @@ class Chat {
 	get activeTabID() {
 		let active_tab_id
 		
-		this.elements.tabs.children.forEach(element => { if (element.checked) { active_tab_id = element.id.match(/tabs_(\w\w\w\w)/)[1] } })
-	
+		this.tabsL.children.forEach(element => { if (element.checked) { active_tab_id = element.id.match(/tabs_(\w\w\w\w)/)[1] } })
+		
 		return active_tab_id
 	}
 	
 	get activeTabElement() {
-		return j.getL("tabs-" + this.activeTabID)
+		return j.getL("tabs_" + this.activeTabID)
 	}
 	
 	set activeTabElement(element) {
@@ -59,7 +75,15 @@ class Chat {
 		builder.clearSavedElement()
 		return users.filter(element => { return element !== "userWhitelist" && element !== "chanWhitelist" })
 	}
-
+	
+	get activeTabDisplayName() {
+		let builder = new ElementConstructor()
+		
+		builder.modifyExistingElement(this.activeTabElement)
+		
+		return builder.labelText.replace(/\WX/, "")
+	}
+	
 	determineTarget() {
 		let type, target
 		
@@ -67,7 +91,7 @@ class Chat {
 		target = event.target
 		
 		if (target.id == "") { return false } //Anything we interact with that we care about will have an ID; skip anything without one
-		console.log(target.id)
+
 		if (type == "keydown") {
 			let valid = [
 				"password_input",
@@ -114,7 +138,7 @@ class Chat {
 				builder.addClass("no-display")
 			}
 			
-			element = builder.returnElement
+			builder.clear()
 		}
 		
 		//toggle between blacklist/whitelist
@@ -151,8 +175,7 @@ class Chat {
 				builder.toggleClass("button-toggle")
 				builder.replaceInnerHTML(element.innerHTML == "off" ? "on" : "off")
 				builder.addAttribute(this.getActiveTabID(), element.innerHTML)
-				
-				element = builder.returnElement
+				builder.clear()
 			}
 		}
 
@@ -168,7 +191,7 @@ class Chat {
 		
 	}
 	
-	//Unfinished
+	//unfinished
 	labelInput() {
 		let key, input, span
 	
@@ -182,248 +205,274 @@ class Chat {
 	}
 	
 	submitPassword() {
-		if (hmAPI && storage) {
-			if (event.key.toLowerCase() == "enter") {
-				let pass = event.target.value
-				
-				fade("out", "password")
-				fade("in", "loading_animation")
-				
-				if (pass.length <= 5) {
-					hmAPI.requestToken(pass)
-				} else {
-					storage.save("chat_token", pass)
-					
-					hmAPI.token = pass
-					hmAPI.requestUsers()
-				
-					fade("out", "login")
-					fade("in", "main")
-				}
-				
+		if (event.key.toLowerCase() == "enter") {
+			let pass = event.target.value
+			
+			gooey.fadeOutMultiple("password", "password_error")
+			gooey.fadeIn("loading_animation")
+			
+			if (pass.length <= 5) {
+				hmAPI.requestToken(pass)
+			} else {
+				hmAPI.token = pass
+				hmAPI.validateToken()
 			}
-		} else {
-			throw new Error(`Missing [Storage Object] named "storage" or [HackmudAPI Object] named "hmAPI".`)
 		}
 	}
 	
-	//unfinished
-	submitChat() {
-		let key, value, match, response, tab_name, value_as_element
-		let auf, acf //active_user_filter - active_channel_filter
-		let commands_array, command_functions_array
-		let joinItems, createFilter
-	
-		key   = event.key.toLowerCase()
-		value = event.target.value
-		match = false
+	parseCommand() {
+		//LAT = eLementAsText, auf = activeUserFilter, acf = activeChannelFilter
+		let value, valueLAT, command, commandLAT, tab, tabID, entry, response
+		let auf, acf
+		let joinItems, commands
 		
-		value    = value.split(" ")[1] || "" //Split the command from the... not command.
-		value    = value.toLowerCase()
+		tabID = this.activeTabID
 		
-		builder.createElement("span")
-		builder.addClass("generic-name")
+		value   = event.target.value
+		value   = value.split(" ") //[/command, value OR nothing]
+		command = value[0].slice(1) //We don't need the slash
+		value   = value[1] || ""
+		
+		commandLAT = new ColoredText(command).asGeneric("command")
+		valueLAT   = new ColoredText(value.toLowerCase()).asGeneric("item")
+		auf        = new ColoredText(this.getActiveFilter("usernames")).asGeneric("item")
+		acf        = new ColoredText(this.getActiveFilter("channels")).asGeneric("item")
+		tab        = new ColoredText(this.activeTabDisplayName).asGeneric("tab")
+		
+		builder.createElement("p")
+		builder.addFlag("data-" + tabID)
+		builder.addClasses("clear", "default-text", "list-entry")
 		builder.addInnerHTML(value)
 		
-		value_as_element = builder.returnElementAsText
+		entry = builder.returnElement
 		
-		createFilter = type => {
-			builder.createElement("span")
-			builder.addClass("generic-item")
-			builder.addInnerHTML(this.getActiveFilter(type))
-			return builder.returnElementAsText
+		joinItems = items => {	
+			items = items.join(this.createSpanAsText("generic-item", "/"))
+			return this.createSpanAsText("generic-name", items)
 		}
 		
-		joinItems = items => {
-			builder.createElement("span")
-			builder.addClass("generic-item")
-			builder.addInnerHTML("/")
-			
-			items = items.join(builder.returnElementAsText)
-			
-			builder.createElement("span")
-			builder.addClass("generic-name")
-			builder.addInnerHTML(items)
-			
-			return builder.returnElementAsText
-		}
-		
-		auf = createFilter("usernames")
-		acf = createFilter("channels")
-		
-		builder.createElement("span")
-		builder.addClass("generic-tab")
-		builder.addInnerHTML(this.activeTabElement.label.innerText.replace(/\WX/, "")) //Remove the 'X' from any tabs that have it
-		tab_name = builder.returnElementAsText
-		
-		commands_array = [
-			/^\/add_user/,
-			/^\/remove_user/,
-			/^\/add_username/,
-			/^\/remove_username/,
-			/^\/add_channel/,
-			/^\/remove_channel/,
-			/^\/replay_tutorial/,
-			/^\/commands/,
-			/^\/channel/
-		]
-		
-		command_functions_array = [
-			_=> { //add_user
-				let users
+		//A bit repatative, maybe think about rewriting some of the add/remove username/channel stuff?
+		commands = {
+			add_user        :_=> {
+				let users = joinItem(this.activeTabUsers)
 				
-				if (hmAPI.users.contains(value)) {
+				if (hmAPI.users.all.contains(value)) {
 					
 					builder.modifyExistingElement(this.activeTabElement)
 					builder.addFlag(value)
-					this.activeTabElement = builder.returnElement
+					builder.clear()
 					
-					users = joinItems(this.activeTabUsers)
-					
-					response = [`TAB ${tab_name} IS NOW SHOWING CHAT FOR ${users}`, "system"]
+					response = [`TAB ${tab} IS NOW SHOWING CHAT FOR ${users}`, "system"]
 				} else {
-					let user
-					
-					user  = value_as_element
-					users = joinItem(this.activeTabUsers)
+					let user = valueLAT
 					
 					response = [`THIS ACCOUNT DOES NOT CONTAIN A ${user} USER; VALID USER OPTIONS ARE ${users}`, "error"]
 				}
 			},
-			_=> { //remove users
+			remove_user     :_=> {
 				let users, user
 				
-				builder.modifyExistingElement(this.activeTabElement)
-				builder.removeAttribute(value)
-				this.activeTabElement = builder.returnElement
-				
+				user  = valueLAT
 				users = joinItems(this.activeTabUsers)
-				user  = value_as_element
 				
-				response = [`REMOVED ${user} FROM TAB ${tab_name}; NOW SHOWING {users}`, "alert"]
-			},
-			_=> {
-				if (value) {
-					let usernames = usernames_el.children
+				if (hmAPI.users.all.contains(value)) {
+					builder.modifyExistingElement(this.activeTabElement)
+					builder.removeAttribute(value)
+					builder.clear()
 					
-					for (i = 0; usernames.length > i; i++) {
-						if (usernames[i].dataset.hasFlag(active_tab)) {
-							if (usernames[i].textContent == value) {
-								response = [`USERNAME ${value_el} ALREADY EXISTS IN ${auf} IN ${tab_name}`, "alert"]
-								return
-							}
-						}
-					}
-					
-					response = [`ADDED USERNAME ${value_el} TO ${auf} FOR ${tab_name}`, "system"]
-					usernames_el.appendChild(fragment)
+					response = [`REMOVED ${user} FROM TAB ${tab}; NOW SHOWING ${users}`, "alert"]
 				} else {
-					response = [`NO USERNAME ADDED [MAKE THIS MORE VERBOSE]`, "error"]
+					response = [`UNABLE TO REMOVE USER ${user} FROM TAB ${tab}; CURRENTLY SHOWING USERS ARE ${users}`, "error"]
 				}
 			},
-			_=> {
-				let usernames = usernames_el.children
+			add_username    :_=> {
+				let user, builder
 				
-				for (i = 0; usernames.length > i; i++) {
-					if (usernames[i].dataset.hasFlag(active_tab)) {
-						if (usernames[i].textContent == value) {
-							response = [`REMOVED USERNAME ${value_el} FROM ${auf} FOR ${tab_name}`, "system"]
-							usernames[i].remove()
-							break
-						}
-					}
-				}
+				user    = valueLAT
+				builder = new ElementConstructor(this.usernamesL)
 				
-				response = response || [`NO USERNAME REMOVED [MAKE THIS MORE VERBOSE]`, "error"]
-			},
-			_=> {
-				if (value) {
-					let channels = channels_el.children
-				
-					for (i = 0; channels.length > i; i++) {
-						if (channels[i].dataset.hasFlag(active_tab)) {
-							if (channels[i].textContent == value) {
-								response = [`CHANNEL ${value_el} ALREADY EXSISTS IN ${auf} IN ${tab_name}`, "alert"]
-								return
-							}
-						}
-					}
+				for (let i = 0; builder.childrenAmount > i; i++) {
+					let builder2 = new ElementConstructor(builder.child(i))
 					
-					response = [`ADDED CHANNEL ${value_el} TO ${auf} for ${tab_name}`, "system"]
-					channels_el.appendChild(fragment)
-				} else {
-					response = [`NO USERNAME ADDED [MAKE THIS MORE VERBOSE]`, "error"]
-				}
-			},
-			_=> {
-				
-				let channels = channels_el.children
-				
-				for (i = 0; channels.length > i; i++) {
-					if (channels[i].dataset.hasFlag(active_tab)) {
-						if (channels[i].textContent == value) {
-							response = [`REMOVED CHANNEL ${value_el} FROM ${active_filter} FOR ${tab_name}`, "alert"]
-							channels[i].remove()
-							break
-						}
+					if (builder2.hasFlag(tabID) && builder2.text == value) {
+						response = [`USERNAME ${user} ALREADY EXISTS IN ${auf} IN TAB ${tab}`, "alert"]
+						return
 					}
 				}
 				
-				response = response || [`NO CHANNEL REMOVED [MAKE THIS MORE VERBOSE]`, "alert"]
-			},
-			_=> { response = [`replay tutorial unfinished`, "error"] },
-			_=> { response = [`commands unfinished`, "error"] },
-			_=> {
+				response = [`ADDED USERNAME ${user} TO ${auf} FOR TAB ${tab}`, "system"]
 				
-				j.main_channel = value
-			}
-		]
-		
-		if (key == "enter") {
-			command_array.forEach((element, index) => {if (element.test(value)) { match = index }})
-			
-			if (tutorial_run) {
-				if (match !== false) {
-					//run a command
-					fragment = `<p data-${active_tab} class="clear default-text list-entry">${value}</p>`.toFragment()
+				builder.addChild(entry)
+				builder.clear()
+			},
+			remove_username :_=> {
+				let user, builder
+				
+				user = valueLAT
+				builder = new ElementConstructor()
+				
+				builder.modifyExistingElement(this.usernamesL)
+				
+				for (let i = 0; builder.childrenAmount > i; i++) {
+					let builder2 = new ElementConstructor()
 					
-					command_functions_array[match]()
-				} else {
-					//regular chat
-					let users = getActiveTabUsers()
+					builder2.modifyExistingElement(builder.child(i))
 					
-					if (users.isEmpty) {
-						response = [`NO USERS ACTIVE FOR TAB ${tab_name}. ADD USERS VIA THE <span class="generic-item">/add_user</span> COMMAND`, "alert"]
-					} else {
-						if (users.length == 1) {
-							if (j.main_channel) {
-								sendMessage(users[0], j.main_channel, value)
-							} else {
-								response = [`NO MAIN CHANNEL SELECTED. CHOOSE A CHANNEL TO CHAT IN WITH THE <span class="generic-item">/channel</span> COMMAND`, "alert"]
-							}
-						}
+					if (builder2.hasFlag(tabID) && builder.text == value) {
+						response = [`REMOVED USERNAME ${user} FROM ${auf} FOR ${tab}`, "system"]
+						builder.removeChild(i)
+						break
 					}
 				}
-			} else {
-				response = [
-	`Welcome to <span class="generic-name">jumpsplat120</span>'s hackmud webclient! Feel free to get in touch in game or on Discord (<span class="generic-name">jumpsplat120#0001</span>) if you encounter any issues.
-	<br><br>
-	This tutorial is an overview of the various abilities of the webclient. By default, this tutorial displays after attempting to send your first message or issue your first command, and shouldn't display after that. However, if you need to reset the tutorial, simply run <span class="generic-item">/reset_tutorial</span>, and you will be able to see this tutorial again.
-	<br><br>
-	This webclient adds a few functions over the regular in game chat. The first thing you will need to do is add a user, to display chat logs for that user in particular. You can add multiple users, or only add one. To add a user, simply type <span class="generic-tab">/add_user </span><span class="generic-item">[username]</span>. If you try to add a user that isn't part of your account, you will recieve an error, so make sure you check spelling. The command is case insensitive, so <span class="generic-name">jUmPsPlAt120</span> and <span class="generic-name">jumpsplat120</span> would both be considered valid parameters for me. To remove a user, use the command <span class="generic-tab">/remove_user</span> <span class="generic-item">[username]</span>.<br> 
-	This webclient is focused on multitasking, through the use of tabs. Up at the top, you can see <span class="generic-tab">default_tab</span>, as well as an addition button. Anything displayed in one tab won't show within another tab, so you can keep various tabs that display various forms of information without having them conflict with each other. For example, one tab could be all your users chat, but you've blacklisted well known bots. Another tab could be only one user, with a whitelist that only allows whispers. To modify the tabs, simply right click on a tab and you can rename it. Any tab beyond the first tab can be closed as well, by either middle clicking the tab, or clicking the X. You are unable to close the default tab. There is a limit of 10 tabs in total. Once a tab is closed, that information is lost! So be extra careful not delete any tabs you still need the information within.<br>
-	Adding and removing users and channels is easy. Simply use the command <span class="generic-tab">/{add/remove}_{channel/username}</span> <span class="generic-item">[username OR channel]</span> to initiate the appropriate action. To filter by whispers, you can add the <span class="generic-item">WSPR</span> channel to the channel filter list. For more explicit information on each command, you can run <span class="generic-tab">/commands</span>, which will show you every command available to you.<br>
-	Lastly, there are buttons in the bottom right hand corner which will allow you to tweak various settings of the webclient, such as the noise and scanline effects. If you have any requests, notice any bugs, or simply want to say thanks, feel free to message me in game, or on Discord! Thank you so much for using my client.`, "system"]
-				tutorial_run = true
-			}
-			j.getL("chat_input").value = ""
-		} else {
-			response = false
+				
+				response = response || [`UNABLE TO REMOVE USERNAME ${user} FROM ${auf} FOR ${tab}`, "error"]
+			},
+			add_channel     :_=> {
+				let chan, builder
+				
+				chan    = valueLAT
+				builder = new ElementConstructor(this.channelsL)
+				
+				for (let i = 0; builder.childrenAmount > i; i++) {
+					let builder2 = new ElementConstructor()
+					
+					builder2.modifyExistingElement(builder.child(i))
+					
+					if (builder2.hasFlag(tabID) && builder2.text == value) {
+						response = [`CHANNEL ${chan} ALREADY EXISTS IN ${acf} IN TAB ${tab}`, "alert"]
+						return
+					}
+				}
+				
+				response = [`ADDED CHANNEL ${chan} TO ${acf} FOR TAB ${tab}`, "system"]
+				
+				builder.addChild(entry)	
+				builder.clear()
+			},
+			remove_channel  :_=> {
+				let chan, builder
+				
+				chan    = valueLAT
+				builder = new ElementConstructor()
+				
+				builder.modifyExistingElement(this.channelsL)
+				
+				for (let i = 0; builder.childrenAmount > i; i++) {
+					let builder2 = new ElementConstructor()
+					
+					builder2.modifyExistingElement(builder.child(i))
+					
+					if (builder2.hasFlag(tabID) && builder2.text == value) {
+						response = [`REMOVED CHANNEL ${chan} FROM ${acf} FOR ${tab}`, "system"]
+						builder.removeChild(i)
+						break
+					}
+				}
+				
+				response = response || [`UNABLE TO REMOVE CHANNEL ${chan} FROM ${acf} FOR ${tab}`, "error"]
+			},
+			replay_tutorial :_=> { response = [`replay tutorial unfinished`, "error"] },
+			commands        :_=> { response = [`commands unfinished`, "error"] },
+			user            :_=> { hmAPI.users.main = value },
+			channel         :_=> { hmAPI.channels.main = value }
 		}
 		
-		if (response) { addMessage(response) }
+		if (command in commands) {
+			commands[command]()
+		} else {
+			let commands = new ColoredText("/commands").asGeneric("command")
+			response = [`COMMAND ${commandLAT} NOT FOUND. CONSIDER RUNNING ${commands} TO VIEW AVAILABLE COMMANDS`, "error"]
+		}
+
+		return response
 	}
 	
+	runThroughTutorial() {
+		let jumpsplat120, discord_name, cased_jumpsplat120
+		let reset_tutorial, add_user, remove_user, finish_tutorial, mixed_command, commands
+		let username, mixed_param, wspr, default_tab
+		
+		jumpsplat120       = new ColoredText("jumpsplat120").asGeneric("name")
+		discord_name       = new ColoredText("jumpsplat120#0001").asGeneric("name")
+		cased_jumpsplat120 = new ColoredText("jUmpSplAt120").asGeneric("name")
+		
+		reset_tutorial  = new ColoredText("/reset_tutorial").asGeneric("command")
+		add_user        = new ColoredText("/add_user").asGeneric("command")
+		remove_user     = new ColoredText("/remove_user").asGeneric("command")
+		finish_tutorial = new ColoredText("/finish_tutorial").asGeneric("command")
+		mixed_command   = new ColoredText("/{add/remove}_{channel/username}").asGeneric("command")
+		commands        = new ColoredText("/commands").asGeneric("command")
+		
+		username    = new ColoredText("[username]").asGeneric("item")
+		mixed_param = new ColoredText("[username] OR [channel]").asGeneric("item")
+		wspr        = new ColoredText("WSPR").asGeneric("item")
+		default_tab = new ColoredText("default_tab").asGeneric("tab")
+		
+		let steps = [`Welcome to ${jumpsplat120}'s Hackmud webclient! Feel free to get in touch in game or on Discord (${discord_name}) if you encounter an issues. This is a tutorial for the webclient. If you wish to skip this tutorial, simply use the command ${finish_tutorial}, and the tutorial will be over. If you do this on accident, you can always reset the tutorial with ${reset_tutorial}. Type anything to continue.`,
+		`This tutorial is an overview of the various abilities of the webclient. By default, this tutorial displays after attempting to send your first message or issue your first command, and shouldn't display after that. As mentioned before, if you need to reset the tutorial, simply run ${reset_tutorial} at any time and you will be able to see this tutorial again. If you feel the tutorial didn't explain something in enough detail, message me using the contact info found above and I will gladly update the tutorial for you.`,
+		`This webclient adds a few functions over the regular in game chat. The first thing you will need to do is add a user, to display chat logs for that user in particular. You can add multiple users, or only add one. To add a user, simply type ${add_user} ${username}. If you try to add a user that isn't part of your account, you will recieve an error, so make sure you check spelling. The command is case insensitive, so ${cased_jumpsplat120} and ${jumpsplat120} would both be considered valid parameters for me. To remove a user, simply use the command ${remove_user} ${username}.`,
+		`This webclient is focused on multitasking, through the use of tabs. Up at the top, you can see ${default_tab}, as well as an addition button. Anything displayed in one tab won't show within another tab, so you can keep various tabs that display various forms of information without having them conflict with each other. For example, one tab could be all your users chat, but you've blacklisted well known bots. Another tab could be only one user, with a whitelist that only allows whispers. To modify the tabs, simply right click on a tab and you can rename it. Any tab beyond the first tab can be closed as well, by either middle clicking the tab, or clicking the X. You are unable to close the default tab. There is a limit of 10 tabs in total. Once a tab is closed, that information is lost! So be extra careful not delete any tabs you still need the information within.`,
+		`Adding and removing users and channels is easy. Simply use the command ${mixed_command} ${mixed_param} to initiate the appropriate action. To filter by whispers, you can add the ${wspr} channel to the channel filter list. For more explicit information on each command, you can run ${commands}, which will show you every command available to you.`,
+		`Lastly, there are buttons in the bottom right hand corner which will allow you to tweak various settings of the webclient, such as the noise and scanline effects. If you have any requests, notice any bugs, or simply want to say thanks, feel free to message me in game, or on Discord! Thank you so much for using my client.`]
+		
+		this.tutorial_step++
+		this.tutorial_run = this.tutorial_step >= steps.length - 1
+		
+		return [steps[this.tutorial_step], "system"]
+	}
+	
+	submitChat() {
+		if (event.key.toLowerCase() == "enter") {
+			let response, tab, value, add_user, channel, user
+			
+			value = event.target.value
+			
+			tab      = new ColoredText(this.activeTabDisplayName).asGeneric("tab")
+			add_user = new ColoredText("/add_user").asGeneric("item")
+			channel  = new ColoredText("/channel").asGeneric("item")
+			user     = new ColoredText("/user").asGeneric("item")
+			
+			response = !this.tutorial_run      ? this.runThroughTutorial() :
+						value.charAt(0) == "/" ? this.parseCommand()       :
+						this.activeTabUsers.length == 0 ? [`NO USERS ACTIVE FOR TAB ${tab}. ADD USERS VIA THE ${add_user} COMMAND`, "alert"] : 
+						this.activeTabUsers.length == 1 ? (this.mainChannel ? (hmAPI.sendMessage(value), false) : [`NO MAIN CHANNEL SELECTED. CHOOSE A CHANNEL TO CHAT IN WITH THE ${channel} COMMAND`, "alert"]) :
+						this.activeTabUsers.length >= 2 ? (this.mainChannel && this.mainUser ? (hmAPI.sendMessage(value), false) : 
+														  !this.mainChannel ? [`NO MAIN CHANNEL SELECTED. CHOOSE A CHANNEL TO CHAT IN WITH THE ${channel} COMMAND`, "alert"] :
+														  !this.mainUser    ? [`NO MAIN USER SELECTED. CHOOSE A USER TO CHAT WITH WITH THE ${user} COMMAND`, "alert"] :
+																			  [`ERR CODE: 541 - RESPONSE EVALUATED TO IMPOSSIBLE STATE.`, "error"]) : 
+																			  [`ERR CODE: 542 - RESPONSE EVALUATED TO IMPOSSIBLE STATE.`, "error"]
+		
+			this.chatsInputL.value = ""
+			
+			if (response) { this.addMessageToChat(response) }
+		}
+	}
+	
+	//unfinished
+	sanitize() {
+		
+	}
+	
+	addMessageToChat(response) {
+		let mod, message, type
+		
+		mod = new ElementConstructor()
+		mod.modifyExistingElement(this.chatsL)
+		
+		message = response[0]
+		type    = response[1]
+
+		message = type ? new ColoredText(message)["as" + type.toCapitalCase()] : message
+		
+		builder.createElement("p")
+		builder.addFlag(this.activeTabID)
+		builder.addClasses("clear", "default-text", "main-entry")
+		builder.addInnerHTML(message)
+		
+		mod.addChild(builder.returnElement)
+		mod.clear()
+	}
+		
 	handleOnKeyDown() {
 		let target
 		
@@ -668,24 +717,4 @@ function changeListType(is_list) {
 		
 		if (match) { return match[1] }
 	}
-}
-
-function addMessage(response) {
-	let template, message, type
-	let active_tab, remove_x
-	
-	message = response[0]
-	type    = response[1]
-	
-	active_tab = getActiveTab()
-	
-	template  = `<p data-${active_tab} class="clear default-text main-entry`
-	template += type ? ` ${type}` : template
-	
-	message   = type == "system" ? `### ${message} ###` :
-				type == "alert"  ? `### ${message} ###` :
-				type == "error"  ? `!!! ${message} !!!` : message
-	template += `">${message}</p>`
-	
-	j.getL("chat_body").appendChild(template.toFragment())
 }
