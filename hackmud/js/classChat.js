@@ -164,7 +164,8 @@ class Chat {
 	
 		key   = event.data
 		input = event.target
-		span  = input.previousSibling
+		console.log(input)
+		builder.modifyExistingElement(input.previousSibling)
 		
 		span.textContent = input.value != "" ? input.value : placeholder
 		
@@ -441,12 +442,13 @@ class Chat {
 	}
 	
 	determineTarget() {
-		let type, target
+		let type, target, label
 		
 		type   = event.type
 		target = event.target
-		
-		if (target.id == "") { return false } //Anything we interact with that we care about will have an ID; skip anything without one
+		label  = target.control || { id: false }
+
+		if (target.id == "" && label.id == "") { return false } //Anything we interact with that we care about will have an ID; skip anything without one
 
 		if (type == "keydown") {
 			let valid = [
@@ -462,16 +464,18 @@ class Chat {
 				return false
 			}
 		} else if (type == "pointerup") {
-			return target.id
 			let valid = [
-				""
+				"username_",
+				"channel_",
+				"tabs_",
+				"add_button"
 			]
-			/*
-			if (valid.contains(target.id)) { 
-				return target.id 
+
+			if (valid.contains(target.id) || valid.contains(label.id)) { 
+				return target.id || label.id
 			} else {
 				return false
-			}*/
+			}
 		}
 	}
 	
@@ -481,12 +485,14 @@ class Chat {
 		target = this.determineTarget()
 		
 		if (target) { //don't bother checking if false; saves cycles
-			if (target == "password_input") {
-				this.submitPassword()
-			} else if (target == "chat_input") {
-				this.submitChat()
-			} else if (target == "new_label") {
-				this.labelInput()
+			let sorter = {
+				password_input: this.submitPassword,
+				chat_input:     this.submitChat,
+				new_label:      this.labelInput
+			}
+			
+			if (Object.keys(sorter).contains(target)) {
+				sorter[target]()
 			} else {
 				throw new Error(`Unable to handle target ${target} onKeyDown; confirm valid entry within 'determineTarget()' method first, or confirm entry within 'handleOnKeyDown()'.`)
 			}
@@ -495,9 +501,29 @@ class Chat {
 	
 	handleOnMouseClick() {
 		let target
-		console.log("The mouse was clicked somewhere on the page!")
+
 		target = this.determineTarget()
-		console.log(target)
+		
+		if (target) {
+			let sorter = {
+				username_bl:     this.changeListType(target),
+				username_wl:     this.changeListType(target),
+				username_toggle: this.toggleState("username"),
+				channel_bl:      this.changeListType(target),
+				channel_wl:      this.changeListType(target),
+				channel_toggle:  this.toggleState("channel"),
+				add_button:      this.addTab()
+			}
+			
+			if (Object.keys(sorter).contains(target)) {
+				sorter[target]()
+			} else if (target.contains("tabs_")) { //Any and all tabs use this func
+				this.handleTabClick()
+			} else {
+				throw new Error(`Unable to handle target ${target} onKeyDown; confirm valid entry within 'determineTarget()' method first, or confirm entry within 'handleOnKeyDown()'.`)
+			}
+			console.log(target)
+		}
 	}
 }
 
@@ -651,28 +677,6 @@ function addTab() {
 	tabs_el.insertBefore(new_tab, tabs[tabs.length - 2])
 	
 	changeTab(new_id)
-}
-
-function submitPass() {	
-	if (event.key.toLowerCase() == "enter") {
-		let pass = event.target.value
-		
-		fade("out", "password")
-		fade("in", "loading_animation")
-		
-		if (pass.length <= 5) {
-			hmAPI.requestToken(pass)
-		} else {
-			storage.save("chat_token", pass)
-			
-			hmAPI.token = pass
-			hmAPI.requestUsers()
-		
-			fade("out", "login")
-			fade("in", "main")
-		}
-		
-	}
 }
 
 //This has become sort of a catch all for clicking on buttons; this should probably be refactored at some point to just be for wl/bl buttons
