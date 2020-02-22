@@ -44,7 +44,6 @@ class Chat {
 		if (builder) {
 			this[type + "ButtonsL"].children.forEach(element => {
 				let builder = new ElementConstructor()
-				
 				builder.modifyExistingElement(element)
 				
 				if (builder.checked) { return builder.id.includes("wl") ? "whitelist" : "blacklist" }})
@@ -72,7 +71,7 @@ class Chat {
 	get activeTabUsers() {
 		builder.modifyExistingElement(this.activeTabElement)
 		let users = Object.keys(builder.allAttributes)
-		builder.clearSavedElement()
+		builder.clear()
 		return users.filter(element => { return element !== "userWhitelist" && element !== "chanWhitelist" })
 	}
 	
@@ -93,9 +92,9 @@ class Chat {
 		user_wl = builder.hasFlag("userWhitelist")
 		chan_wl = builder.hasFlag("chanWhitelist")
 		
-		builder.clearSavedElement()
+		builder.clear()
 		
-		//remove element
+		//remove element for all except one we're changing to
 		remove = element => {
 			builder.modifyExistingElement(element)
 			
@@ -154,8 +153,7 @@ class Chat {
 		toggle("channels", chan_wl)
 		
 		onOff(this.channelsButtonsTL)
-		onOff(this.usernamesButtonsTL)
-		
+		onOff(this.usernamesButtonsTL)	
 	}
 	
 	//unfinished
@@ -208,7 +206,7 @@ class Chat {
 		tab        = new ColoredText(this.activeTabDisplayName).asGeneric("tab")
 		
 		builder.createElement("p")
-		builder.addFlag("data-" + tabID)
+		builder.addFlag("data" + tabID.toCapitalCase())
 		builder.addClasses("clear", "default-text", "list-entry")
 		builder.addInnerHTML(value)
 		
@@ -339,7 +337,11 @@ class Chat {
 				
 				response = response || [`UNABLE TO REMOVE CHANNEL ${chan} FROM ${acf} FOR ${tab}`, "error"]
 			},
-			replay_tutorial :_=> { response = [`replay tutorial unfinished`, "error"] },
+			reset_tutorial :_=> { response = [`replay tutorial unfinished`, "error"] },
+			finish_tutorial :_=> {
+				this.tutorial_step = 99
+				response = [`Thank you so much for using my client!`, "system"] 
+			},
 			commands        :_=> { response = [`commands unfinished`, "error"] },
 			user            :_=> { hmAPI.users.main = value },
 			channel         :_=> { hmAPI.channels.main = value }
@@ -381,7 +383,7 @@ class Chat {
 		`This webclient adds a few functions over the regular in game chat. The first thing you will need to do is add a user, to display chat logs for that user in particular. You can add multiple users, or only add one. To add a user, simply type ${add_user} ${username}. If you try to add a user that isn't part of your account, you will recieve an error, so make sure you check spelling. The command is case insensitive, so ${cased_jumpsplat120} and ${jumpsplat120} would both be considered valid parameters for me. To remove a user, simply use the command ${remove_user} ${username}.`,
 		`This webclient is focused on multitasking, through the use of tabs. Up at the top, you can see ${default_tab}, as well as an addition button. Anything displayed in one tab won't show within another tab, so you can keep various tabs that display various forms of information without having them conflict with each other. For example, one tab could be all your users chat, but you've blacklisted well known bots. Another tab could be only one user, with a whitelist that only allows whispers. To modify the tabs, simply right click on a tab and you can rename it. Any tab beyond the first tab can be closed as well, by either middle clicking the tab, or clicking the X. You are unable to close the default tab. There is a limit of 10 tabs in total. Once a tab is closed, that information is lost! So be extra careful not delete any tabs you still need the information within.`,
 		`Adding and removing users and channels is easy. Simply use the command ${mixed_command} ${mixed_param} to initiate the appropriate action. To filter by whispers, you can add the ${wspr} channel to the channel filter list. For more explicit information on each command, you can run ${commands}, which will show you every command available to you.`,
-		`Lastly, there are buttons in the bottom right hand corner which will allow you to tweak various settings of the webclient, such as the noise and scanline effects. If you have any requests, notice any bugs, or simply want to say thanks, feel free to message me in game, or on Discord! Thank you so much for using my client.`]
+		`Lastly, there are buttons in the bottom right hand corner which will allow you to tweak various settings of the webclient, such as the noise and scanline effects. If you have any requests, notice any bugs, or simply want to say thanks, feel free to message me in game, or on Discord! Thank you so much for using my client!`]
 		
 		this.tutorial_step++
 		this.tutorial_run = this.tutorial_step >= steps.length - 1
@@ -441,6 +443,115 @@ class Chat {
 		mod.clear()
 	}
 	
+	//unfinished
+	changeListType(to) {
+		
+	}
+	
+	//unfinished
+	toggleState() {
+		
+	}
+	
+	//unfinished
+	addTab() {
+		let tabs_el, tabs, tabs_array, new_id, index
+	
+		tabs_el    = j.getL("tabs")
+		tabs       = tabs_el.childNodes
+		tabs_array = []
+		new_id     = j.randomString(4)
+		index      = 0
+		
+		for (let i = 0; tabs.length > i; i++) { 
+			index += tabs[i].nodeName.toLowerCase() == "input" ? (tabs_array.push(i), 1) : 0
+		}
+		
+		//Maximum 10 tabs allowed; hide add button after 10th element
+		if (index == 9) { tabs_el.lastElementChild.classList.add("no-display") }
+		
+		for (let i = 0; tabs_array.length > i; i++) {
+			let input, label, span
+			
+			input = tabs[tabs_array[i]]
+			label = input.label
+			span  = label.children ? label.children[0] : false
+			
+			input.checked = false
+			label.classList.remove("button-choice")
+			if (span) { delete span.dataset.active }
+		}
+		
+		const new_tab = `<input data-user-whitelist data-chan-whitelist id="tabs_${new_id}" type="radio" name="tabs" class="no-display" checked /><label for="tabs_${new_id}" class="default-text radio-label button button-choice" onpointerup="tabClick()" onmouseover="event.target.firstElementChild.dataset.hover = true;" onmouseleave="delete event.target.firstElementChild.dataset.hover;">new_tab_${index + 1}&nbsp;<span data-active class="button-exit" onmouseover="event.stopPropagation();" onpointerup="spanClose()">X</span></label>`.toFragment()
+		
+		j.getL("username_toggle").dataset[new_id] = "off"
+		j.getL("channel_toggle").dataset[new_id]  = "off"
+		
+		tabs_el.insertBefore(new_tab, tabs[tabs.length - 2])
+		
+		changeTab(new_id)
+	}
+	
+	//unfinished
+	handleTabClick() {
+		let target, dflt
+	
+		target = event.target
+		dflt   = j.getL("tabs_dflt")
+		
+		const options = [
+			_=> { //left click
+				let id = changeListType()
+				changeTab(id)
+			},
+			_=> { //middle click
+				let label, radio, is_active
+				
+				label     = target
+				radio     = label.control
+				is_active = radio.checked
+
+				if (radio.id != "tabs_dflt") {
+					radio.remove()
+					target.remove()
+				}
+				
+				if (is_active) {
+					dflt.checked = true
+					dflt.label.classList.add("button-choice")
+				}
+				
+				replaceAddTabButton()
+				changeTab("dflt")
+			},
+			_=> { //right click
+				let label, radio, text, prev, input
+				
+				const PLACEHOLDER = "input new name here"
+				
+				label = target
+				radio = label.control
+				text  = radio.id == "tabs_dflt" ? label.innerText : label.innerText.slice(0, -2)
+				prev  = {
+					index: label.htmlFor.match(/tabs_(\w\w\w\w)/)[1],
+					choice: label.className.match(/button-choice/) || [""],
+					value: text,
+					name: text.replace(/\\/g, "[SLASH]").replace(/'/g, "\\'")
+				}
+				
+				label.outerHTML = `<div class="default-text input-wrapper"><span id="new_label_measure" class="clear input-measure">${prev.value}</span><input id="new_label" maxlength="15" class="clear default-text input" placeholder="${PLACEHOLDER}" value="${prev.value}" oninput="labelInput('${PLACEHOLDER}')" onkeydown="labelSubmit('${prev.index}:${prev.choice[0]}:${prev.name}')" onfocusout="labelFocusLost('${prev.index}:${prev.choice[0]}:${prev.name}')" /></div>`
+				
+				input = j.getL("new_label")
+				span  = j.getL("new_label_measure")
+				
+				input.style.width = span.offsetWidth + "px"
+				input.focus()
+			}
+		]
+		
+		options[event.button]()
+	}
+	
 	determineTarget() {
 		let type, target, label
 		
@@ -486,9 +597,9 @@ class Chat {
 		
 		if (target) { //don't bother checking if false; saves cycles
 			let sorter = {
-				password_input: this.submitPassword,
-				chat_input:     this.submitChat,
-				new_label:      this.labelInput
+				password_input: this.submitPassword.bind(this),
+				chat_input:     this.submitChat.bind(this),
+				new_label:      this.labelInput.bind(this)
 			}
 			
 			if (Object.keys(sorter).contains(target)) {
@@ -506,84 +617,24 @@ class Chat {
 		
 		if (target) {
 			let sorter = {
-				username_bl:     this.changeListType(target),
-				username_wl:     this.changeListType(target),
-				username_toggle: this.toggleState("username"),
-				channel_bl:      this.changeListType(target),
-				channel_wl:      this.changeListType(target),
-				channel_toggle:  this.toggleState("channel"),
-				add_button:      this.addTab()
+				username_bl:     this.changeListType.bind(this),
+				username_wl:     this.changeListType.bind(this),
+				username_toggle: this.toggleState.bind(this),
+				channel_bl:      this.changeListType.bind(this),
+				channel_wl:      this.changeListType.bind(this),
+				channel_toggle:  this.toggleState.bind(this),
+				add_button:      this.addTab.bind(this)
 			}
 			
 			if (Object.keys(sorter).contains(target)) {
 				sorter[target]()
-			} else if (target.contains("tabs_")) { //Any and all tabs use this func
+			} else if (target.contains("tabs_")) { //dynamic names means tabs have to be handled here
 				this.handleTabClick()
 			} else {
 				throw new Error(`Unable to handle target ${target} onKeyDown; confirm valid entry within 'determineTarget()' method first, or confirm entry within 'handleOnKeyDown()'.`)
 			}
-			console.log(target)
 		}
 	}
-}
-
-function tabClick() {
-	let target, dflt
-	
-	target = event.target
-	dflt   = j.getL("tabs_dflt")
-	
-	const options = [
-		_=> { //left click
-			let id = changeListType()
-			changeTab(id)
-		},
-		_=> { //middle click
-			let label, radio, is_active
-			
-			label     = target
-			radio     = label.control
-			is_active = radio.checked
-
-			if (radio.id != "tabs_dflt") {
-				radio.remove()
-				target.remove()
-			}
-			
-			if (is_active) {
-				dflt.checked = true
-				dflt.label.classList.add("button-choice")
-			}
-			
-			replaceAddTabButton()
-			changeTab("dflt")
-		},
-		_=> { //right click
-			let label, radio, text, prev, input
-			
-			const PLACEHOLDER = "input new name here"
-			
-			label = target
-			radio = label.control
-			text  = radio.id == "tabs_dflt" ? label.innerText : label.innerText.slice(0, -2)
-			prev  = {
-				index: label.htmlFor.match(/tabs_(\w\w\w\w)/)[1],
-				choice: label.className.match(/button-choice/) || [""],
-				value: text,
-				name: text.replace(/\\/g, "[SLASH]").replace(/'/g, "\\'")
-			}
-			
-			label.outerHTML = `<div class="default-text input-wrapper"><span id="new_label_measure" class="clear input-measure">${prev.value}</span><input id="new_label" maxlength="15" class="clear default-text input" placeholder="${PLACEHOLDER}" value="${prev.value}" oninput="labelInput('${PLACEHOLDER}')" onkeydown="labelSubmit('${prev.index}:${prev.choice[0]}:${prev.name}')" onfocusout="labelFocusLost('${prev.index}:${prev.choice[0]}:${prev.name}')" /></div>`
-			
-			input = j.getL("new_label")
-			span  = j.getL("new_label_measure")
-			
-			input.style.width = span.offsetWidth + "px"
-			input.focus()
-		}
-	]
-	
-	options[event.button]()
 }
 
 function labelFocusLost(literal) {
@@ -639,44 +690,6 @@ function replaceAddTabButton() {
 			if (tab_amount == 9) { j.getL("add_button").classList.remove("no-display") }
 		}
 	}
-}
-
-function addTab() {
-	let tabs_el, tabs, tabs_array, new_id, index
-	
-	tabs_el    = j.getL("tabs")
-	tabs       = tabs_el.childNodes
-	tabs_array = []
-	new_id     = j.randomString(4)
-	index      = 0
-	
-	for (let i = 0; tabs.length > i; i++) { 
-		index += tabs[i].nodeName.toLowerCase() == "input" ? (tabs_array.push(i), 1) : 0
-	}
-	
-	//Maximum 10 tabs allowed; hide add button after 10th element
-	if (index == 9) { tabs_el.lastElementChild.classList.add("no-display") }
-	
-	for (let i = 0; tabs_array.length > i; i++) {
-		let input, label, span
-		
-		input = tabs[tabs_array[i]]
-		label = input.label
-		span  = label.children ? label.children[0] : false
-		
-		input.checked = false
-		label.classList.remove("button-choice")
-		if (span) { delete span.dataset.active }
-	}
-	
-	const new_tab = `<input data-user-whitelist data-chan-whitelist id="tabs_${new_id}" type="radio" name="tabs" class="no-display" checked /><label for="tabs_${new_id}" class="default-text radio-label button button-choice" onpointerup="tabClick()" onmouseover="event.target.firstElementChild.dataset.hover = true;" onmouseleave="delete event.target.firstElementChild.dataset.hover;">new_tab_${index + 1}&nbsp;<span data-active class="button-exit" onmouseover="event.stopPropagation();" onpointerup="spanClose()">X</span></label>`.toFragment()
-	
-	j.getL("username_toggle").dataset[new_id] = "off"
-	j.getL("channel_toggle").dataset[new_id]  = "off"
-	
-	tabs_el.insertBefore(new_tab, tabs[tabs.length - 2])
-	
-	changeTab(new_id)
 }
 
 //This has become sort of a catch all for clicking on buttons; this should probably be refactored at some point to just be for wl/bl buttons

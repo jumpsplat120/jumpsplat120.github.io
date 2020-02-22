@@ -8,13 +8,17 @@ class ElementConstructor {
 	
 	isValidElement(element) {
 		if (typeof element !== "object") { return false } else {
-			let string_name, regex
+			let string_name, r1, r2
 			
 			string_name = element.toString()
-			regex = /\[object HTML[^U]?[^n]?[^k]?[^n]?[^o]?[^w]?[^n]?Element\]/
-
-			//We are looking for [object HTML{something}Element] but if {something} is 'Unknown' we want this to return false
-			return regex.test(string_name)
+			r1 = /\[object HTML.+Element\]/
+			r2 = /\[object HTMLUknownElement\]/
+			
+			if (r1.test(string_name)) {
+				return !r2.test(string_name) //Anything except HTMLUknownElement
+			} else {
+				return false //Not an HTMLElement
+			}
 		}
 	}
 	
@@ -157,7 +161,6 @@ class ElementConstructor {
 	}
 	
 	/*A flag is just an attribute with no value*/
-	
 	hasFlag(flag_name) {
 		return this.hasAttribute(flag_name)
 	}
