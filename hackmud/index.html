@@ -67,8 +67,8 @@
 		<div id="main" class="grid-body fade invisible no-display">
 			<div id="tabs" class="grid-tabs tabs-container">
 				<input id="tabs_dflt" type="radio" name="tabs" class="no-display" checked />
-					<label for="tabs_dflt" class="default-text radio-label button button-choice" onpointerup="tabClick()">default_tab</label>
-				<button id="add_button" class="clear default-text button" onclick="addTab()">+</button>
+					<label for="tabs_dflt" class="default-text radio-label button button-choice">default_tab</label>
+				<button id="add_button" class="clear default-text button">+</button>
 			</div>
 			<div id="chat" class="grid-chat">
 				<div id="chat_body" class="grid-chat-body chat-body">
@@ -92,10 +92,10 @@
 				</div>
 				<div id="usernames_buttons" class="grid-username-buttons list-minor buttons-container">
 					<input id="username_bl" type="radio" name="usernames" class="no-display" checked />
-						<label for="username_bl" class="default-text blacklist-label radio-label button button-choice" onclick="changeListType(true)"></label>
+						<label for="username_bl" class="default-text blacklist-label radio-label button button-choice"></label>
 					<input id="username_wl" type="radio" name="usernames" class="no-display" />
-						<label for="username_wl" class="default-text whitelist-label radio-label button" onclick="changeListType(true)"></label>
-					<button data-dflt="off" id="username_toggle" class="clear default-text button" onclick="toggleList()">off</button>
+						<label for="username_wl" class="default-text whitelist-label radio-label button"></label>
+					<button data-dflt="off" id="username_toggle" class="clear default-text button">off</button>
 				</div>
 			</div>
 			<div id="channels" class="grid-channels main">
@@ -111,10 +111,10 @@
 				</div>
 				<div id="channels_buttons" class="grid-channel-buttons list-minor buttons-container">
 					<input id="channel_bl" type="radio" name="channels" class="no-display" checked>
-						<label for="channel_bl" class="default-text blacklist-label radio-label button button-choice" onclick="changeListType(true)"></label>
+						<label for="channel_bl" class="default-text blacklist-label radio-label button button-choice"></label>
 					<input id="channel_wl" type="radio" name="channels" class="no-display">
-						<label for="channel_wl" class="default-text whitelist-label radio-label button" onclick="changeListType(true)"></label>
-					<button data-dflt="off" id="channel_toggle" class="clear default-text button" onclick="toggleList()">off</button>
+						<label for="channel_wl" class="default-text whitelist-label radio-label button"></label>
+					<button data-dflt="off" id="channel_toggle" class="clear default-text button">off</button>
 				</div>
 			</div>
 			<div id="scripts" class="grid-scripts"></div>

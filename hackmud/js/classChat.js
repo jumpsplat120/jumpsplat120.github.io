@@ -84,39 +84,6 @@ class Chat {
 		return builder.labelText.replace(/\WX/, "")
 	}
 	
-	determineTarget() {
-		let type, target
-		
-		type   = event.type
-		target = event.target
-		
-		if (target.id == "") { return false } //Anything we interact with that we care about will have an ID; skip anything without one
-
-		if (type == "keydown") {
-			let valid = [
-				"password_input",
-				"chat_input",
-				"new_label"
-			]
-			
-			if (valid.contains(target.id)) { 
-				//Only return id if it's valid for that specific event type; don't return password_input on click for example
-				return target.id 
-			} else {
-				return false
-			}
-		} else if (type == "pointerup") {
-			let valid = [
-			]
-			if (valid.contains(target.id)) { 
-				//Only return id if it's valid for that specific event type; don't return password_input on click for example
-				return target.id 
-			} else {
-				return false
-			}
-		}
-	}
-	
 	changeToTab(tab_id) {
 		let remove, toggle, onOff
 		let user_wl, chan_wl
@@ -472,7 +439,42 @@ class Chat {
 		mod.addChild(builder.returnElement)
 		mod.clear()
 	}
+	
+	determineTarget() {
+		let type, target
 		
+		type   = event.type
+		target = event.target
+		
+		if (target.id == "") { return false } //Anything we interact with that we care about will have an ID; skip anything without one
+
+		if (type == "keydown") {
+			let valid = [
+				"password_input",
+				"chat_input",
+				"new_label"
+			]
+			
+			if (valid.contains(target.id)) { 
+				//Only return id if it's valid for that specific event type; don't return password_input on click for example
+				return target.id 
+			} else {
+				return false
+			}
+		} else if (type == "pointerup") {
+			return target.id
+			let valid = [
+				""
+			]
+			/*
+			if (valid.contains(target.id)) { 
+				return target.id 
+			} else {
+				return false
+			}*/
+		}
+	}
+	
 	handleOnKeyDown() {
 		let target
 		
@@ -495,6 +497,7 @@ class Chat {
 		let target
 		console.log("The mouse was clicked somewhere on the page!")
 		target = this.determineTarget()
+		console.log(target)
 	}
 }
 

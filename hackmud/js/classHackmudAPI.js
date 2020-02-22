@@ -4,10 +4,6 @@ class HackmudAPI {
 		this.interval   = null
 		this.response   = null
 		this.validation = false
-		this._        = {
-			token:    undefined,
-			timecode: undefined
-		}
 		this.users    = {
 			set main(value) {
 				if (this.all.contains(value)) {
@@ -20,7 +16,8 @@ class HackmudAPI {
 				if (this._.main) {
 					return this._.main
 				} else {
-					throw new Error(`Unable to access main user, as no main user was set.`)
+					console.warn("No main user has been set.")
+					return false
 				}
 			},
 			_: {
@@ -40,7 +37,8 @@ class HackmudAPI {
 				if (this._.main) {
 					return this._.main
 				} else {
-					throw new Error(`Unable to access main channel, as no main channel was set.`)
+					console.warn("No main channel has been set.")
+					return false
 				}
 			},
 			_: {
@@ -48,26 +46,26 @@ class HackmudAPI {
 			},
 			all: channels
 		}
+		this._        = {
+			token: undefined
+		}
 	}
 	
 	set token(value)    {
 		console.log(`Token has been set as ${value}`)
 		this._.token = value
 	}
-	set timecode(value) {
-		console.log(`Timecode is ${value}`)
-		this._.timecode = value
-	}
 	
 	get token() { 
 		if (this._.token) {
 			return this._.token
 		} else {
-			throw new Error(`Unable to access token as no token was ever set.`)
+			throw new Error(`Unable to access token, as no token was ever set.`)
 		}
-	}	
+	}
+	
 	get timecode() { 
-		return this._.timecode 
+		return new Date().getTime() / 1000
 	}
 	
 	validateToken() {
@@ -154,24 +152,7 @@ class HackmudAPI {
 	
 	//unfinished
 	receiveChat() {
-		//builder.modifyExistingElement(j.getL("default_chat"))
-		if (j_log.length > 0) {			
-			const a_time = a_log[a_log.length - 1] ? a_log[a_log.length - 1].t : 0
-			const j_time = j_log[j_log.length - 1] ? j_log[j_log.length - 1].t : 0
-			j.timecode = j_time > a_time ? j_time : a_time
-			const chat_log = a_log.concat(j_log)
-			chat_log.sort(function(a, b) { return a.t - a.b })
-			
-			chat_log.forEach(obj => {
-				const channel   = obj.channel ? obj.channel : "from"
-				const username  = obj.from_user
-				
-				const newline = `<p><span class="color_b">${getIngameTimestamp(obj.t)}</span> <span class="color_vv">${channel}</span> <span class ="color_${usernameColor(username)}">${username}</span><span class="color_b"> :::</span>${sanitizeString(obj.msg)}<span class="color_b">:::</span></p>`
-				getL("default_chat").insertAdjacentHTML("beforeend", newline)
-			})
-		}
 		
-		j.timecode += .5
 	}
 	
 	handleResponse() {
