@@ -337,9 +337,14 @@ class Chat {
 				
 				response = response || [`UNABLE TO REMOVE CHANNEL ${chan} FROM ${acf} FOR ${tab}`, "error"]
 			},
-			reset_tutorial :_=> { response = [`replay tutorial unfinished`, "error"] },
+			reset_tutorial :_=>  {
+				this.tutorial_step = -1
+				this.tutorial_has_run = false
+				response = [`TUTORIAL HAS BEEN RESET`, "system"]
+			},
 			finish_tutorial :_=> {
-				this.tutorial_step = 99
+				this.tutorial_has_run = true
+				console.log(this)
 				response = [`Thank you so much for using my client!`, "system"] 
 			},
 			commands        :_=> { response = [`commands unfinished`, "error"] },
@@ -386,7 +391,7 @@ class Chat {
 		`Lastly, there are buttons in the bottom right hand corner which will allow you to tweak various settings of the webclient, such as the noise and scanline effects. If you have any requests, notice any bugs, or simply want to say thanks, feel free to message me in game, or on Discord! Thank you so much for using my client!`]
 		
 		this.tutorial_step++
-		this.tutorial_run = this.tutorial_step >= steps.length - 1
+		this.tutorial_has_run = this.tutorial_step >= steps.length - 1
 		
 		return [steps[this.tutorial_step], "system"]
 	}
@@ -402,8 +407,8 @@ class Chat {
 			channel  = new ColoredText("/channel").asGeneric("item")
 			user     = new ColoredText("/user").asGeneric("item")
 			
-			response = !this.tutorial_run      ? this.runThroughTutorial() :
-						value.charAt(0) == "/" ? this.parseCommand()       :
+			response =  value.charAt(0) == "/" ? this.parseCommand()       :
+					   !this.tutorial_has_run  ? this.runThroughTutorial() :
 						this.activeTabUsers.length == 0 ? [`NO USERS ACTIVE FOR TAB ${tab}. ADD USERS VIA THE ${add_user} COMMAND`, "alert"] : 
 						this.activeTabUsers.length == 1 ? (this.mainChannel ? (hmAPI.sendMessage(value), false) : [`NO MAIN CHANNEL SELECTED. CHOOSE A CHANNEL TO CHAT IN WITH THE ${channel} COMMAND`, "alert"]) :
 						this.activeTabUsers.length >= 2 ? (this.mainChannel && this.mainUser ? (hmAPI.sendMessage(value), false) : 
@@ -445,7 +450,66 @@ class Chat {
 	
 	//unfinished
 	changeListType(to) {
+		let clicked_button, unclicked_button
 		
+		clicked_button   = new ElementConstructor(j.getL(to))
+		unclicked_button = new ElementConstructor(to.contains("username") ? 
+			to.contains("bl") ? this.usernamesButtonsWL : this.usernamesButtonsBL :
+			to.contains("bl") ? this.channelsButtonsWL : this.channelsButtonsBL)
+		
+		clicked_button.checked = true
+		clicked_button.addClass("button-choice")
+		console.dir(unclicked_button.element)
+		unclicked_button.checked = false
+		unclicked_button.removeClass("button-choice")
+		//builder.checked = true
+		//builder.addClass("button-choice")
+		
+		
+		/*
+		let elements, target, span, radio
+		let active_tab, id, tab_dataset, type
+		
+		elements   = event.path[1].children
+		target     = event.target
+		span       = target.children ? target.children[0] : false
+		radio      = target.control	
+		active_tab = getActiveTab()
+		
+		for (let i = 0; elements.length > i; i++) {
+			let el, span
+			
+			el   = elements[i]
+			span = el.children ? el.children[0] : false
+			
+			el.checked = false
+			el.classList.remove("button-choice")
+			if (span) { delete span.dataset.active }
+		}
+		
+		target.control.checked = true
+		target.classList.add("button-choice")
+		
+		id          = target.control.id
+		tab_dataset = j.getL(`tabs_${active_tab}`).dataset
+		type        = id.includes("username") ? "user" : "chan"
+		
+		if (is_list) { //Only trigger on whitelist/blacklist buttons
+			if (id.includes("wl")) {
+				tab_dataset[type + "Whitelist"] = true
+			} else {
+				delete tab_dataset[type + "Whitelist"]
+			}
+		}
+		
+		if (span) { span.dataset.active = true }
+		
+		//returns tab id if tab; for use in tabClick => changeTab
+		if (radio) {
+			let match = radio.id.match(/tabs_(\w\w\w\w)/)
+			
+			if (match) { return match[1] }
+		}*/
 	}
 	
 	//unfinished
@@ -602,7 +666,7 @@ class Chat {
 				new_label:      this.labelInput.bind(this)
 			}
 			
-			if (Object.keys(sorter).contains(target)) {
+			if (target in sorter) {
 				sorter[target]()
 			} else {
 				throw new Error(`Unable to handle target ${target} onKeyDown; confirm valid entry within 'determineTarget()' method first, or confirm entry within 'handleOnKeyDown()'.`)
@@ -626,8 +690,8 @@ class Chat {
 				add_button:      this.addTab.bind(this)
 			}
 			
-			if (Object.keys(sorter).contains(target)) {
-				sorter[target]()
+			if (target in sorter) {
+				sorter[target](target)
 			} else if (target.contains("tabs_")) { //dynamic names means tabs have to be handled here
 				this.handleTabClick()
 			} else {
@@ -689,52 +753,5 @@ function replaceAddTabButton() {
 			const tab_amount = (element.children.length - 1) / 2
 			if (tab_amount == 9) { j.getL("add_button").classList.remove("no-display") }
 		}
-	}
-}
-
-//This has become sort of a catch all for clicking on buttons; this should probably be refactored at some point to just be for wl/bl buttons
-function changeListType(is_list) {
-	let elements, target, span, radio
-	let active_tab, id, tab_dataset, type
-	
-	elements   = event.path[1].children
-	target     = event.target
-	span       = target.children ? target.children[0] : false
-	radio      = target.control	
-	active_tab = getActiveTab()
-	
-	for (let i = 0; elements.length > i; i++) {
-		let el, span
-		
-		el   = elements[i]
-		span = el.children ? el.children[0] : false
-		
-		el.checked = false
-		el.classList.remove("button-choice")
-		if (span) { delete span.dataset.active }
-	}
-	
-	target.control.checked = true
-	target.classList.add("button-choice")
-	
-	id          = target.control.id
-	tab_dataset = j.getL(`tabs_${active_tab}`).dataset
-	type        = id.includes("username") ? "user" : "chan"
-	
-	if (is_list) { //Only trigger on whitelist/blacklist buttons
-		if (id.includes("wl")) {
-			tab_dataset[type + "Whitelist"] = true
-		} else {
-			delete tab_dataset[type + "Whitelist"]
-		}
-	}
-	
-	if (span) { span.dataset.active = true }
-	
-	//returns tab id if tab; for use in tabClick => changeTab
-	if (radio) {
-		let match = radio.id.match(/tabs_(\w\w\w\w)/)
-		
-		if (match) { return match[1] }
 	}
 }

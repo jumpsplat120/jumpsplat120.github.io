@@ -52,12 +52,10 @@ Object.defineProperty(Array.prototype, "contains", { value: function(string) {
 //Checks a string to see if it contains a portion of the submitted string. Partially an alias
 //for the regex method match(); this saves the time of converting one string into a regex expression
 //before comparing the two.
-Object.defineProperty(String.prototype, "contains", { value: function(string) {
-	string = typeof string == "string" ? string : string.toString()
+Object.defineProperty(String.prototype, "contains", { value: function(string) {	
+	let regex = new RegExp(typeof string == "string" ? string.asUTF16 : string.toString().asUTF16)
 	
-	let regex = new RegExp(element.toString().asUTF16)
-	
-	return regex.test(string)
+	return regex.test(this)
 }})
 
 //Returns a string encoded as UTF-16 characters (\uFFFF style)

@@ -190,10 +190,10 @@ class ElementConstructor {
 	}
 	
 	set checked(bool) {
-		if (typeof bool !== boolean) { 
+		if (typeof bool !== "boolean") { 
 			throw new Error("Checked can only be set to true or false.")
 		} else {
-			this.checked = bool
+			this.element.checked = bool
 		}
 	}
 	
