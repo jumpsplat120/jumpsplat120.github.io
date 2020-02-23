@@ -49,13 +49,9 @@ Object.defineProperty(Array.prototype, "contains", { value: function(string) {
 	return match.length > 0 ? match : false
 }})
 
-//Checks a string to see if it contains a portion of the submitted string. Partially an alias
-//for the regex method match(); this saves the time of converting one string into a regex expression
-//before comparing the two.
+//Alias for includes because I always forget that it's called that
 Object.defineProperty(String.prototype, "contains", { value: function(string) {	
-	let regex = new RegExp(typeof string == "string" ? string.asUTF16 : string.toString().asUTF16)
-	
-	return regex.test(this)
+	return this.includes(string)
 }})
 
 //Returns a string encoded as UTF-16 characters (\uFFFF style)

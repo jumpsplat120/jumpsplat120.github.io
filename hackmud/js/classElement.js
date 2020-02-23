@@ -215,7 +215,7 @@ class ElementConstructor {
 	
 	removeInnerHTML() {
 		if (this.hasInnerHTML) {
-			delete this.element.innerHTML
+			this.element.innerHTML = ""
 		} else {
 			throw new Error("Element does not contain anything within innerHTML to remove.")
 		}

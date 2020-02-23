@@ -448,73 +448,43 @@ class Chat {
 		mod.clear()
 	}
 	
-	//unfinished
 	changeListType(to) {
-		let clicked_button, unclicked_button
+		let clicked, unclicked, unclickedL, active_tab, flag
 		
-		clicked_button   = new ElementConstructor(j.getL(to))
-		unclicked_button = new ElementConstructor(to.contains("username") ? 
+		unclickedL = to.contains("username") ? 
 			to.contains("bl") ? this.usernamesButtonsWL : this.usernamesButtonsBL :
-			to.contains("bl") ? this.channelsButtonsWL : this.channelsButtonsBL)
+			to.contains("bl") ? this.channelsButtonsWL : this.channelsButtonsBL
 		
-		clicked_button.checked = true
-		clicked_button.addClass("button-choice")
-		console.dir(unclicked_button.element)
-		unclicked_button.checked = false
-		unclicked_button.removeClass("button-choice")
-		//builder.checked = true
-		//builder.addClass("button-choice")
+		flag = to.contains("username") ? "usernameWhitelist" : "channelWhitelist"
 		
+		active_tab = new ElementConstructor(this.activeTabElement)
+		clicked    = new ElementConstructor(j.getL(to).label)
+		unclicked  = new ElementConstructor(unclickedL.label)
 		
-		/*
-		let elements, target, span, radio
-		let active_tab, id, tab_dataset, type
+		clicked.checked = true
+		clicked.addClass("button-choice")
+
+		unclicked.checked = false
+		unclicked.removeClass("button-choice")
 		
-		elements   = event.path[1].children
-		target     = event.target
-		span       = target.children ? target.children[0] : false
-		radio      = target.control	
-		active_tab = getActiveTab()
-		
-		for (let i = 0; elements.length > i; i++) {
-			let el, span
-			
-			el   = elements[i]
-			span = el.children ? el.children[0] : false
-			
-			el.checked = false
-			el.classList.remove("button-choice")
-			if (span) { delete span.dataset.active }
-		}
-		
-		target.control.checked = true
-		target.classList.add("button-choice")
-		
-		id          = target.control.id
-		tab_dataset = j.getL(`tabs_${active_tab}`).dataset
-		type        = id.includes("username") ? "user" : "chan"
-		
-		if (is_list) { //Only trigger on whitelist/blacklist buttons
-			if (id.includes("wl")) {
-				tab_dataset[type + "Whitelist"] = true
-			} else {
-				delete tab_dataset[type + "Whitelist"]
-			}
-		}
-		
-		if (span) { span.dataset.active = true }
-		
-		//returns tab id if tab; for use in tabClick => changeTab
-		if (radio) {
-			let match = radio.id.match(/tabs_(\w\w\w\w)/)
-			
-			if (match) { return match[1] }
-		}*/
+		active_tab[`${to.contains("wl") ? "add" : "remove"}Flag`](flag)
 	}
 	
-	//unfinished
-	toggleState() {
+	toggleState(target) {
+		let button, state
 		
+		button = new ElementConstructor(j.getL(target))
+		
+		state = button.text == "off" ? "on" : "off"
+
+		button.toggleClass("button-toggle")
+		button.replaceInnerHTML(state)
+		
+		if (button.hasAttribute(this.activeTabID)) {
+			button.modifyAttributeValue(this.activeTabID, state)
+		} else {
+			button.addAttribute(this.activeTabID, state)
+		}
 	}
 	
 	//unfinished
