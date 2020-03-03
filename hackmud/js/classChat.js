@@ -19,7 +19,8 @@ class Chat {
 	get chatL()              { return j.getL("chat")              }
 	get chatsL()             { return j.getL("chat_body")         }
 	get chatsInputL()        { return j.getL("chat_input")        }
-	get tabsL()              { return j.getL("tabs")              }	
+	get tabsL()              { return j.getL("tabs")              }
+	get defaultTabL()        { return j.getL("tabs_dflt")         }
 	get mainUser()			 { return hmAPI.users.main            }	
 	get mainChannel()		 { return hmAPI.channels.main         }
 	
@@ -62,10 +63,6 @@ class Chat {
 	
 	get activeTabElement() {
 		return j.getL("tabs_" + this.activeTabID)
-	}
-	
-	set activeTabElement(element) {
-		j.getL("tabs-" + this.activeTabID) = element
 	}
 	
 	get activeTabUsers() {
@@ -156,18 +153,30 @@ class Chat {
 		onOff(this.usernamesButtonsTL)	
 	}
 	
-	//unfinished
-	labelInput() {
-		let key, input, span
+	newTabInput() {
+		let target, key, span
+		
+		target = event.target
+		key    = event.key.toLowerCase()
+		span   = target.previousSibling
+		
+		if (key == "enter") {
+			target.blur()
+		} else {
+			let value = key.match(/^.$/)   ? target.value + key + " " :
+						key == "backspace" ? target.value.slice(0, -1) :
+						target.value
+			
+			span.innerHTML = value !== "" ? value : "input new name here "
+			
+			target.style.width = span.offsetWidth + "px"
+		}
+	}
 	
-		key   = event.data
-		input = event.target
-		console.log(input)
-		builder.modifyExistingElement(input.previousSibling)
-		
-		span.textContent = input.value != "" ? input.value : placeholder
-		
-		input.style.width = span.offsetWidth + "px"
+	saveNewTabName() {
+		console.log(this)
+		console.log(event)
+		builder.
 	}
 	
 	submitPassword() {
@@ -451,23 +460,26 @@ class Chat {
 	changeListType(to) {
 		let clicked, unclicked, unclickedL, active_tab, flag
 		
-		unclickedL = to.contains("username") ? 
-			to.contains("bl") ? this.usernamesButtonsWL : this.usernamesButtonsBL :
-			to.contains("bl") ? this.channelsButtonsWL : this.channelsButtonsBL
+		clicked = new ElementConstructor(j.getL(to).label)
 		
-		flag = to.contains("username") ? "usernameWhitelist" : "channelWhitelist"
-		
-		active_tab = new ElementConstructor(this.activeTabElement)
-		clicked    = new ElementConstructor(j.getL(to).label)
-		unclicked  = new ElementConstructor(unclickedL.label)
-		
-		clicked.checked = true
-		clicked.addClass("button-choice")
+		if (!clicked.checked) {
+			unclickedL = to.contains("username") ? 
+				to.contains("bl") ? this.usernamesButtonsWL : this.usernamesButtonsBL :
+				to.contains("bl") ? this.channelsButtonsWL : this.channelsButtonsBL
+			
+			flag = to.contains("username") ? "usernameWhitelist" : "channelWhitelist"
+			
+			active_tab = new ElementConstructor(this.activeTabElement)
+			unclicked  = new ElementConstructor(unclickedL.label)
+			
+			clicked.checked = true
+			clicked.addClass("button-choice")
 
-		unclicked.checked = false
-		unclicked.removeClass("button-choice")
-		
-		active_tab[`${to.contains("wl") ? "add" : "remove"}Flag`](flag)
+			unclicked.checked = false
+			unclicked.removeClass("button-choice")
+			
+			active_tab[`${to.contains("wl") ? "add" : "remove"}Flag`](flag)
+		}
 	}
 	
 	toggleState(target) {
@@ -528,62 +540,99 @@ class Chat {
 	
 	//unfinished
 	handleTabClick() {
-		let target, dflt
-	
-		target = event.target
-		dflt   = j.getL("tabs_dflt")
+		let map, click, target, clickedElement, is_default_tab
 		
-		const options = [
-			_=> { //left click
-				let id = changeListType()
-				changeTab(id)
-			},
-			_=> { //middle click
-				let label, radio, is_active
+		target         = event.target
+		clickedElement = new ElementConstructor(target)
+		is_default_tab = clickedElement.control.id == "tabs_dflt"
+		
+		function leftClick() {			
+			if (!clickedElement.checked) {
+				tabs = this.tabsL.children
 				
-				label     = target
-				radio     = label.control
-				is_active = radio.checked
-
-				if (radio.id != "tabs_dflt") {
-					radio.remove()
-					target.remove()
-				}
+				tabs.forEach(element =>{
+					con_element = new ElementConstructor(element)
+					
+					con_element.checked = false
+					con_element.removeClass("button-choice")
+				})
 				
-				if (is_active) {
-					dflt.checked = true
-					dflt.label.classList.add("button-choice")
-				}
-				
-				replaceAddTabButton()
-				changeTab("dflt")
-			},
-			_=> { //right click
-				let label, radio, text, prev, input
-				
-				const PLACEHOLDER = "input new name here"
-				
-				label = target
-				radio = label.control
-				text  = radio.id == "tabs_dflt" ? label.innerText : label.innerText.slice(0, -2)
-				prev  = {
-					index: label.htmlFor.match(/tabs_(\w\w\w\w)/)[1],
-					choice: label.className.match(/button-choice/) || [""],
-					value: text,
-					name: text.replace(/\\/g, "[SLASH]").replace(/'/g, "\\'")
-				}
-				
-				label.outerHTML = `<div class="default-text input-wrapper"><span id="new_label_measure" class="clear input-measure">${prev.value}</span><input id="new_label" maxlength="15" class="clear default-text input" placeholder="${PLACEHOLDER}" value="${prev.value}" oninput="labelInput('${PLACEHOLDER}')" onkeydown="labelSubmit('${prev.index}:${prev.choice[0]}:${prev.name}')" onfocusout="labelFocusLost('${prev.index}:${prev.choice[0]}:${prev.name}')" /></div>`
-				
-				input = j.getL("new_label")
-				span  = j.getL("new_label_measure")
-				
-				input.style.width = span.offsetWidth + "px"
-				input.focus()
+				clicked.checked = true
+				clicked.addClass("button-choice")
 			}
-		]
+		}
 		
-		options[event.button]()
+		function rightClick() {
+			let prev, input, span, old_text
+			
+			span  = new ElementConstructor()
+			input = new ElementConstructor()
+			
+			old_text = is_default_tab ? clickedElement.text : clickedElement.text.slice(0, -2)
+			
+			builder.createElement("div")
+			span.createElement("span")
+			input.createElement("input")
+			
+			span.addID("new_label_measuring_stick")
+			input.addID("new_label")
+			
+			builder.addClasses("default-text", "input-wrapper")
+			span.addClasses("clear", "input-measure")
+			input.addClasses("clear", "default-text", "input")
+			
+			input.addAttribute("tabID", this.activeTabID)
+			input.addAttribute("originalName", this.activeTabDisplayName)
+			input.addAttribute("wasActive", clickedElement.hasClass("button-choice"))
+			
+			if (clickedElement.hasFlag("userWhitelist")) { input.addFlag("userWhitelist") }
+			if (clickedElement.hasFlag("chanWhitelist")) { input.addFlag("chanWhitelist") }
+			
+			old_text = is_default_tab ? clickedElement.text : clickedElement.text.slice(0, -2)
+			
+			input.modifyProperty("maxlength", "15")
+			input.modifyProperty("placeholder", "input new name here")
+			input.modifyProperty("value", old_text)
+			
+			span.addInnerHTML(old_text + " ")
+			
+			builder.addChild(span.returnElement)
+			builder.addChild(input.returnElement)
+			
+			clickedElement.replaceWith(builder.returnElement)
+			
+			input = j.getL("new_label")
+			
+			input.style.width = j.getL("new_label_measuring_stick").offsetWidth + "px" //Can't get width of measuring stick until it exists in the DOM
+			input.focus()
+
+			input.addEventListener("blur", this.saveNewTabName.bind(this))
+		}
+		
+		function middleClick() {
+			let label, radio, is_active
+				
+			label     = target
+			radio     = label.control
+			is_active = radio.checked
+
+			if (radio.id != "tabs_dflt") {
+				radio.remove()
+				target.remove()
+			}
+			
+			if (is_active) {
+				dflt.checked = true
+				dflt.label.classList.add("button-choice")
+			}
+			
+			replaceAddTabButton()
+			changeTab("dflt")
+		}
+
+		click = [leftClick, middleClick, rightClick]
+		
+		click[event.button].bind(this)()
 	}
 	
 	determineTarget() {
@@ -633,7 +682,7 @@ class Chat {
 			let sorter = {
 				password_input: this.submitPassword.bind(this),
 				chat_input:     this.submitChat.bind(this),
-				new_label:      this.labelInput.bind(this)
+				new_label:      this.newTabInput.bind(this)
 			}
 			
 			if (target in sorter) {
@@ -669,6 +718,7 @@ class Chat {
 			}
 		}
 	}
+	
 }
 
 function labelFocusLost(literal) {

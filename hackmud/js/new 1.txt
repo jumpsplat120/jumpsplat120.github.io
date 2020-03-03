@@ -1,6 +1,5 @@
    * maybe add some controls for the noise and lines for people who don't like those things
    * add history for things typed
-   * Add the login page
    * Redo the intro. Might just make a video and have that play, since doing it all native in the browser window makes it fall apart if the browser isn't the right size and it's a nightmare to try to make it look good at all sizes. A video would be 100x easier.
    * I guess also add in the actual chatting-in-the-game functionality
    * Add in some personal stuff

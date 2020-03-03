@@ -327,6 +327,23 @@ class ElementConstructor {
 		}
 	}
 	
+	//unfinished
+	modifyProperty(property, value) {
+		this.element[property] = value
+	}
+	
+	get hasControl() {
+		return this.element.control !== undefined
+	}
+	
+	get control() {
+		if (this.hasControl) {
+			return this.element.control
+		} else {
+			throw new Error("Element does not have an assigned control.")
+		}
+	}
+	
 	get text() {
 		//innerText is more performant heavy, but is a more accurate representation of what is
 		//actually being shown in the document. However, not all Nodes use innerText. Therefore
@@ -342,15 +359,29 @@ class ElementConstructor {
 	}
 	
 	get hasLabel() {
-		if (this.element.label !== undefined) { return true } else { return false }
+		return this.element.label !== undefined
 	}
 	
 	get labelText() {
 		if (this.hasLabel) {
 			return this.element.label.innerText
 		} else {
-			throw new Error("Element does have an assigned label.")
+			throw new Error("Element does not have an assigned label.")
 		}
+	}
+	
+	replaceWith(element) {
+		this.element.replaceWith(element)
+	}
+	
+	//unfinished
+	modifyStyle(style_name, value) {
+		this.element.style[style_name] = value
+	}
+	
+	//unfinished
+	getStyleValue(style_name) {
+		return this.element.style[style_name]
 	}
 	
 	get element() {
