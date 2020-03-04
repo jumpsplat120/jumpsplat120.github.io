@@ -1,25 +1,33 @@
 class ElementConstructor {
 	constructor(element) {
+		
 		if (element !== undefined) {
-			if (!this.isValidElement(element)) { throw new Error("Passed element was not a valid HTML element.") }
+			if (this.isValidElement(element)) {
+				//element = element
+			} else if (this.isValidElementType(element)) {
+				element = `<${element}></${element}>`.toFragment().childNodes[0]
+			} else {
+				throw new Error("Passed element was not a valid HTML element, nor valid element type.")
+			}
 		}
 		this._ = { element }
 	}
 	
 	isValidElement(element) {
-		if (typeof element !== "object") { return false } else {
-			let string_name, r1, r2
-			
-			string_name = element.toString()
-			r1 = /\[object HTML.+Element\]/
-			r2 = /\[object HTMLUknownElement\]/
-			
-			if (r1.test(string_name)) {
-				return !r2.test(string_name) //Anything except HTMLUknownElement
-			} else {
-				return false //Not an HTMLElement
+		if (element) {
+			if (typeof element !== "object") { return false } else {
+				let string_name, r1, r2
+				
+				string_name = element.toString()
+				r1 = /\[object HTML.+Element\]/
+				r2 = /\[object HTMLUnknownElement\]/
+				if (r1.test(string_name)) {
+					return !r2.test(string_name) //Anything except HTMLUnknownElement
+				} else {
+					return false //Not an HTMLElement
+				}
 			}
-		}
+		} else { return false }
 	}
 	
 	isValidElementType(element_type) {
@@ -57,6 +65,49 @@ class ElementConstructor {
 			}
 		} else {
 			throw new Error("No element was passed.")
+		}
+	}
+	
+	get type() {
+		return this.element.tagName.toLowerCase()
+	}
+	
+	set sizeUnit(value) {
+		const valid_units = {
+			em: true,
+			ex: true,
+			ch: true,
+			rem: true,
+			vw: true,
+			vh: true,
+			vmin: true,
+			vmax: true,
+			cm: true,
+			mm: true,
+			Q: true,
+			in: true,
+			pc: true,
+			pt: true,
+			px: true
+		}
+		
+		if (valid_units[value]) {
+			return this._.unit = value
+		} else {
+			throw new Error(`'${value}' is not a valid unit of measurement. Be aware that size units are case sensitive.`)
+		}
+	}
+	
+	get hasAssignedSizeUnit() {
+		return this._.unit !== undefined
+	}
+	
+	get sizeUnit() {
+		if (this.hasAssignedSizeUnit) {
+			return this._.unit
+		} else {
+			console.warn("No assigned size unit; using 'px' as a default.")
+			return "px"
 		}
 	}
 	
@@ -267,7 +318,7 @@ class ElementConstructor {
 		throw new Error("Can not set id directly; you must use one of the ID methods.")
 	}
 	
-	get id() { 
+	get id() {
 		if (this.hasID) {
 			return this.element.id
 		} else {
@@ -303,14 +354,26 @@ class ElementConstructor {
 		return this.element.children.length
 	}
 	
+	get hasChildren() {
+		return this.childrenAmount !== 0
+	}
+	
+	get children() {
+		if (!this.hasChildren) {
+			console.warn("This element has no children.")
+		}
+		return this.element.children
+	}
+	
 	childExists(index) {
 		return this.element.children[index] !== undefined
 	}
 	
 	child(index) {
 		if (this.childExists(index)) {
-			return this.element.children[index]
+			return new ElementConstructor(this.element.children[index])
 		} else {
+			console.dir(this.element)
 			throw new Error(`Unable to access child at index ${index}.`)
 		}
 	}
@@ -319,11 +382,85 @@ class ElementConstructor {
 		this.element.appendChild(element)
 	}
 	
+	addChildAt(index, element) {
+		if (this.childrenAmount > 0) {
+			index = Math.max(0, index - 1)
+			if (index == 0) {
+				this.child(0).element.insertAdjacentElement("beforebegin", element)
+			} else {
+				if (this.childExists(index)) {
+					this.child(index).element.insertAdjacentElement("afterend", element)
+				} else {
+					throw new Error(`Unable to insert after child, as no child exists at index '${index}'`)
+				}
+			}
+		} else {
+			throw new Error("No other children exist; use addChild to add a child element regardless of index.")
+		}
+	}
+	
 	removeChild(index) {
 		if (this.childExists(index)) {
-			this.child.remove()
+			this.child(index).element.remove()
 		} else {
 			throw new Error(`Unable to remove child at index ${index}.`)
+		}
+	}
+	
+	get hasPreviousSibling() {
+		return this.element.previousSibling !== null
+	}
+	
+	get hasNextSibling() {
+		return this.element.nextSibling !== null
+	}
+	
+	get previousSibling() {
+		if (this.hasPreviousSibling) {
+			return new ElementConstructor(this.element.previousSibling)
+		} else {
+			throw new Error("Element does not have a sibling that precedes it.")
+		}
+	}
+	
+	get nextSibling() {
+		if (this.hasNextSibling) {
+			return new ElementConstructor(this.element.nextSibling)
+		} else {
+			throw new Error("Element does not have a sibling that follows it.")
+		}
+	}
+	
+	get width() {
+		return this.element.offsetWidth + this.sizeUnit
+	}
+	
+	//unfinished
+	loseFocus() {
+		this.element.blur()
+	}
+	
+	//unfinished
+	gainFocus() {
+		this.element.focus()
+	}
+	
+	get takesInput() {
+		return this.element.value !== undefined
+	}
+	
+	get hasCurrentInput() {
+		return this.element.value !== ""
+	}
+	
+	get currentInput() {
+		if (this.takesInput) {
+			if (!this.hasCurrentInput) {
+				console.warn("The input of this element was empty.")
+			}
+			return this.element.value
+		} else {
+			throw new Error("This element does not take input.")
 		}
 	}
 	
@@ -338,7 +475,7 @@ class ElementConstructor {
 	
 	get control() {
 		if (this.hasControl) {
-			return this.element.control
+			return new ElementConstructor(this.element.control)
 		} else {
 			throw new Error("Element does not have an assigned control.")
 		}
@@ -362,6 +499,14 @@ class ElementConstructor {
 		return this.element.label !== undefined
 	}
 	
+	get label() {
+		if (this.hasLabel) {
+			return new ElementConstructor(this.element.label)
+		} else {
+			throw new Error("Element does not have an assigned label.")
+		}
+	}
+	
 	get labelText() {
 		if (this.hasLabel) {
 			return this.element.label.innerText
@@ -371,7 +516,12 @@ class ElementConstructor {
 	}
 	
 	replaceWith(element) {
-		this.element.replaceWith(element)
+		if (new ElementConstructor(element).isValidElement) {
+			this.element.replaceWith(element)
+			this._.element = element
+		} else {
+			throw new Error("Unable to replace as passed element was not a valid element.")
+		}
 	}
 	
 	//unfinished

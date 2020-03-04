@@ -153,32 +153,6 @@ class Chat {
 		onOff(this.usernamesButtonsTL)	
 	}
 	
-	newTabInput() {
-		let target, key, span
-		
-		target = event.target
-		key    = event.key.toLowerCase()
-		span   = target.previousSibling
-		
-		if (key == "enter") {
-			target.blur()
-		} else {
-			let value = key.match(/^.$/)   ? target.value + key + " " :
-						key == "backspace" ? target.value.slice(0, -1) :
-						target.value
-			
-			span.innerHTML = value !== "" ? value : "input new name here "
-			
-			target.style.width = span.offsetWidth + "px"
-		}
-	}
-	
-	saveNewTabName() {
-		console.log(this)
-		console.log(event)
-		builder.
-	}
-	
 	submitPassword() {
 		if (event.key.toLowerCase() == "enter") {
 			let pass = event.target.value
@@ -534,61 +508,181 @@ class Chat {
 		j.getL("channel_toggle").dataset[new_id]  = "off"
 		
 		tabs_el.insertBefore(new_tab, tabs[tabs.length - 2])
+	}
+	
+	removeTab() {
+		console.log("UNFINISHED")
+	}
+	
+	createNewTab(tab_parameters) {
+		let button, label, span
 		
-		changeTab(new_id)
+		button = new ElementConstructor("input")
+		label  = new ElementConstructor("label")
+		span   = new ElementConstructor("span")
+		
+		if (tab_parameters) { //I don't know why I feel like I'm going to end up missing something, so we've got a bunch of asserts. Normally I don't but eh
+			console.assert(tab_parameters.tabID             !== undefined, "Missing tabID.")
+			console.assert(tab_parameters.original_name     !== undefined, "Missing original_name.")
+			console.assert(tab_parameters.was_active        !== undefined, "Missing was_active.")
+			console.assert(tab_parameters.position          !== undefined, "Missing position.")
+			console.assert(tab_parameters.user_whitelist    !== undefined, "Missing user_whitelist.")
+			console.assert(tab_parameters.channel_whitelist !== undefined, "Missing channel_whitelist.")
+			console.assert(tab_parameters.new_name          !== undefined, "Missing new_name.")
+		}
+
+		button.addID(tab_parameters.tabID)
+		
+		button.modifyProperty("type", "radio")
+		button.modifyProperty("name", "tabs")
+		
+		if (tab_parameters.user_whitelist) { button.addFlag("userWhitelist") }
+		if (tab_parameters.chan_whitelist) { button.addFlag("chanWhitelist") }
+		
+		button.addClass("no-display")
+		
+		if (tab_parameters.was_active) { button.checked = true }
+		
+		label.modifyProperty("for", `tabs_${tab_parameters.tabID}`)
+		
+		label.addClasses("default-text", "radio-label", "button")
+		if (tab_parameters.was_active) { label.addClass("button-choice") }
+		
+		label.addInnerHTML(tab_parameters.new_name == "" ? tab_parameters.original_name : tab_parameters.new_name)
+		
+		if (tab_parameters.tabID !== "tabs_dflt") {
+			label.element.addEventListener("mouseover", function() { new ElementConstructor(event.target).nextSibling.addFlag("hover") }) //adds flag to X
+			label.element.addEventListener("mouseleave", function() { new ElementConstructor(event.target).nextSibling.removeFlag("hover") }) //removes flag from X
+		
+			if (tab_parameters.was_active) { span.addFlag("active") }
+			
+			span.addID(`close_${tab_parameters.tabID}`)
+			
+			span.addClass("button-exit")
+			
+			span.addInnerHTML("&nbsp;X")
+			
+			span.element.addEventListener("mouseover", function() { event.stopPropagation() })
+			
+			label.addChild(span.returnElement)
+		}
+		
+		return { label: label.returnElement, button: button.returnElement }
+	}
+	
+	saveNewTabName() {
+		let input, tab_param, elements, tabs
+		
+		input = new ElementConstructor(event.target)
+		tabs = new ElementConstructor(this.tabsL)
+		
+		tab_param = {
+			tabID:             input.getAttributeValue("tabID"),
+			original_name:     input.getAttributeValue("originalName"),
+			was_active:        input.getAttributeValue("wasActive").asBoolean,
+			position:          input.getAttributeValue("position"),
+			user_whitelist:    input.hasFlag("userWhitelist"),
+			channel_whitelist: input.hasFlag("chanWhitelist"),
+			new_name:          input.currentInput
+		}
+		
+		elements = this.createNewTab(tab_param)
+		
+		j.getL("new_label").remove()
+		tabs.addChildAt(tab_param.position, elements.label)
+		tabs.addChildAt(tab_param.position, elements.button)
+	}
+	
+	newTabInput() {
+		let target, key, measuring_stick
+		
+		target          = new ElementConstructor(event.target)
+		key             = event.key.toLowerCase()
+
+		measuring_stick = new ElementConstructor(target.previousSibling.returnElement)
+		
+		if (key == "enter") {
+			target.loseFocus()
+		} else {
+			let input = key.match(/^.$/)   ? target.currentInput + key + " " :
+						key == "backspace" ? target.currentInput.slice(0, -1) + " " :
+						target.currentInput
+			
+			measuring_stick.replaceInnerHTML(input !== "" ? input : "input new name here ")
+
+			target.modifyStyle("width", measuring_stick.width)
+		}
 	}
 	
 	//unfinished
 	handleTabClick() {
-		let map, click, target, clickedElement, is_default_tab
+		let map, click, target, clicked_element, is_default_tab
 		
 		target         = event.target
-		clickedElement = new ElementConstructor(target)
-		is_default_tab = clickedElement.control.id == "tabs_dflt"
+		clicked_element = new ElementConstructor(target)
+		is_default_tab = clicked_element.control.id == "tabs_dflt"
 		
 		function leftClick() {			
-			if (!clickedElement.checked) {
-				tabs = this.tabsL.children
+			if (!clicked_element.checked) {
+				let tabs = this.tabsL.children
 				
 				tabs.forEach(element =>{
-					con_element = new ElementConstructor(element)
+					let tab, span_x, is_default_tab
 					
-					con_element.checked = false
-					con_element.removeClass("button-choice")
+					tab = new ElementConstructor(element)
+
+					if (tab.type == "input") {
+						is_default_tab = tab.id == "tabs_dflt"
+						
+						if (!is_default_tab) { span_x = tab.label.child(0) }
+						
+						tab.checked = false
+						
+						if (tab.label.hasClass("button-choice")) { tab.label.removeClass("button-choice") }
+						if (span_x && span_x.hasFlag("active")) { span_x.removeFlag("active") }
+					}
 				})
 				
-				clicked.checked = true
-				clicked.addClass("button-choice")
+				clicked_element.checked = true
+				clicked_element.addClass("button-choice")
+				
+				if (!is_default_tab) { new ElementConstructor(clicked_element.label.child(0)).addFlag("active") }
 			}
 		}
 		
 		function rightClick() {
-			let prev, input, span, old_text
+			let prev, input, span, old_text, index, tabID
 			
 			span  = new ElementConstructor()
 			input = new ElementConstructor()
 			
-			old_text = is_default_tab ? clickedElement.text : clickedElement.text.slice(0, -2)
+			old_text = is_default_tab ? clicked_element.text : clicked_element.text.slice(0, -2)
+			
+			tabID = clicked_element.control.id
+			
+			this.tabsL.children.forEach((element, i) => { if (element.id == clicked_element.control.id) { index = i } })
 			
 			builder.createElement("div")
 			span.createElement("span")
 			input.createElement("input")
 			
+			builder.addID("new_label")
 			span.addID("new_label_measuring_stick")
-			input.addID("new_label")
+			input.addID("new_label_input")
 			
 			builder.addClasses("default-text", "input-wrapper")
 			span.addClasses("clear", "input-measure")
 			input.addClasses("clear", "default-text", "input")
 			
-			input.addAttribute("tabID", this.activeTabID)
-			input.addAttribute("originalName", this.activeTabDisplayName)
-			input.addAttribute("wasActive", clickedElement.hasClass("button-choice"))
+			input.addAttribute("tabID", tabID)
+			input.addAttribute("originalName", clicked_element.text)
+			input.addAttribute("wasActive", clicked_element.hasClass("button-choice"))
+			input.addAttribute("position", index)
 			
-			if (clickedElement.hasFlag("userWhitelist")) { input.addFlag("userWhitelist") }
-			if (clickedElement.hasFlag("chanWhitelist")) { input.addFlag("chanWhitelist") }
+			if (clicked_element.hasFlag("userWhitelist")) { input.addFlag("userWhitelist") }
+			if (clicked_element.hasFlag("chanWhitelist")) { input.addFlag("chanWhitelist") }
 			
-			old_text = is_default_tab ? clickedElement.text : clickedElement.text.slice(0, -2)
+			old_text = is_default_tab ? clicked_element.text : clicked_element.text.slice(0, -2)
 			
 			input.modifyProperty("maxlength", "15")
 			input.modifyProperty("placeholder", "input new name here")
@@ -599,16 +693,18 @@ class Chat {
 			builder.addChild(span.returnElement)
 			builder.addChild(input.returnElement)
 			
-			clickedElement.replaceWith(builder.returnElement)
+			clicked_element.replaceWith(builder.returnElement)
 			
-			input = j.getL("new_label")
+			input.modifyExistingElement(j.getL("new_label_input"))
 			
-			input.style.width = j.getL("new_label_measuring_stick").offsetWidth + "px" //Can't get width of measuring stick until it exists in the DOM
-			input.focus()
+			j.getL(tabID).remove()
+			
+			input.modifyStyle("width", new ElementConstructor(j.getL("new_label_measuring_stick")).width) //Can't get width of measuring stick until it exists in the DOM
+			input.gainFocus()
 
-			input.addEventListener("blur", this.saveNewTabName.bind(this))
+			input.element.addEventListener("blur", this.saveNewTabName.bind(this))
 		}
-		
+		//unfinished
 		function middleClick() {
 			let label, radio, is_active
 				
@@ -648,7 +744,7 @@ class Chat {
 			let valid = [
 				"password_input",
 				"chat_input",
-				"new_label"
+				"new_label_input"
 			]
 			
 			if (valid.contains(target.id)) { 
@@ -680,9 +776,9 @@ class Chat {
 		
 		if (target) { //don't bother checking if false; saves cycles
 			let sorter = {
-				password_input: this.submitPassword.bind(this),
-				chat_input:     this.submitChat.bind(this),
-				new_label:      this.newTabInput.bind(this)
+				password_input:  this.submitPassword.bind(this),
+				chat_input:      this.submitChat.bind(this),
+				new_label_input: this.newTabInput.bind(this)
 			}
 			
 			if (target in sorter) {
@@ -713,6 +809,8 @@ class Chat {
 				sorter[target](target)
 			} else if (target.contains("tabs_")) { //dynamic names means tabs have to be handled here
 				this.handleTabClick()
+			} else if (target.contains("close_")) {
+				this.removeTab()
 			} else {
 				throw new Error(`Unable to handle target ${target} onKeyDown; confirm valid entry within 'determineTarget()' method first, or confirm entry within 'handleOnKeyDown()'.`)
 			}

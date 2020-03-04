@@ -49,6 +49,17 @@ Object.defineProperty(Array.prototype, "contains", { value: function(string) {
 	return match.length > 0 ? match : false
 }})
 
+//Converts a string into a boolean. Strict conversion
+Object.defineProperty(String.prototype, "asBoolean", { get: function() {
+	let lower = this.toLowerCase()
+	
+	if (lower === "true" || lower === "false") {
+		return lower === "true"
+	} else {
+		throw new Error(`'${this}' can not be read as a boolean; string 'true' or string 'false' expected.`)
+	}
+}})
+
 //Alias for includes because I always forget that it's called that
 Object.defineProperty(String.prototype, "contains", { value: function(string) {	
 	return this.includes(string)
