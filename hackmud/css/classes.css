@@ -121,6 +121,10 @@
 	display: block;
 }
 
+.list-entry:hover {
+	color: var(--default-light);
+}
+
 /*------button elements-------*/
 
 .blacklist-label::before {
@@ -133,11 +137,11 @@
 
 @media (max-width:1280px) {
 	.blacklist-label::before {
-	content: "bl";
+		content: "bl";
 	}
 
 	.whitelist-label::before {
-	content: "wl";
+		content: "wl";
 	}
 }
 

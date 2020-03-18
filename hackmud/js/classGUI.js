@@ -135,4 +135,21 @@ class GirafficsUserInterface {
 		
 		this.time.fade.ends = this.fadeEnding
 	}
+	
+	playIntro() {
+		console.warn("UNFINISHED")
+		
+		if (storage.has("chat_token")) {
+			this.fadeOutMultiple("password", "password_error")
+			this.fadeIn("loading_animation")
+			
+			hmAPI.token = storage.get("chat_token")
+			hmAPI.validateToken()
+		} else {
+			chat.state = "login"
+			
+			this.fadeOut("intro")
+			this.fadeIn("login")
+		}
+	}
 }

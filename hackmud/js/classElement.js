@@ -350,6 +350,14 @@ class ElementConstructor {
 		}
 	}
 	
+	get parent() {
+		if (this.elementExists) {
+			
+		} else {
+			throw new Error( )
+		}
+	}
+	
 	get childrenAmount() {
 		return this.element.children.length
 	}
@@ -404,6 +412,14 @@ class ElementConstructor {
 			this.child(index).element.remove()
 		} else {
 			throw new Error(`Unable to remove child at index ${index}.`)
+		}
+	}
+	
+	remove() {
+		if (this.elementExists) {
+			this.element.remove()
+		} else {
+			throw new Error("Unable to remove an element that does not exist.")
 		}
 	}
 	
@@ -466,7 +482,7 @@ class ElementConstructor {
 	
 	//unfinished
 	modifyProperty(property, value) {
-		this.element[property] = value
+		this.element.setAttribute(property, value)
 	}
 	
 	get hasControl() {

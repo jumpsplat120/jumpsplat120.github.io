@@ -148,6 +148,8 @@ class HackmudAPI {
 		
 		gooey.fadeOut("login")
 		gooey.fadeIn("main")
+		
+		chat.state = "main"
 	}
 	
 	//unfinished
