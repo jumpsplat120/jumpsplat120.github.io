@@ -1,6 +1,6 @@
 class HackmudAPI {
 	constructor(token, timecode, users, channels) {
-		this.http     = new XMLHttpRequest()
+		this.http       = new XMLHttpRequest()
 		this.interval   = null
 		this.response   = null
 		this.validation = false
@@ -75,7 +75,7 @@ class HackmudAPI {
 	
 	openConnection(to) {
 		this.http.open("POST", "https://www.hackmud.com/mobile/" + to + ".json")
-		this.http.setRequestHeader("Content-Type","application/json")
+		this.http.setRequestHeader("Content-Type", "application/json")
 	}
 	
 	sendData(obj) {
