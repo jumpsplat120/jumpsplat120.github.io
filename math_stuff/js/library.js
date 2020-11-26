@@ -439,7 +439,6 @@ export class Color {
 	set name(x) {
 		}
 	
-	
 	//============Front End Methods============//
 	
 	lighten(percentage) {
