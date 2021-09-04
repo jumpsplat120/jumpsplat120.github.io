@@ -181,6 +181,9 @@ class HackmudAPI {
 			this.receiveUsers()
 		} else if (this.response.chats) {
 			this.receiveChat() 
+		} else if (401) {
+			console.warning("Token is no longer valid. Sending back to login page...")
+			gooey.fadeInMultiple("login", "password")
 		}
 	}
 	
