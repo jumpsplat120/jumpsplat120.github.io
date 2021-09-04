@@ -88,7 +88,7 @@ Object.defineProperty(Array.prototype, "deduplicate", { value: function() {
 //the number 5, and your original scale is 0-10 and your new scale is 10-20,
 //your new result would return as 15
 Object.defineProperty(Number.prototype, "map", { value: function(from_min, from_max, to_min, to_max) {
-	this = (this - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
+	return (this - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
 }})
 
 //Adds TAU to the Math Object
