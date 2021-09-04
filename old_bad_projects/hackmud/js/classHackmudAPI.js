@@ -145,7 +145,7 @@ class HackmudAPI {
 		console.log(`Users for this account: ${this.users.all.join(", ")}`)
 		console.log(`Channels for this account: ${this.channels.all.join(", ")}`)
 		
-		this.interval = setInterval(this.requestChat.bind(this), 1250)
+		this.interval = setInterval(this.requestChat.bind(this), 1400)
 		
 		gooey.fadeOut("login")
 		gooey.fadeIn("main")
