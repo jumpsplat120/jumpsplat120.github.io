@@ -76,6 +76,7 @@ class HackmudAPI {
 	openConnection(to) {
 		this.http.open("POST", "https://www.hackmud.com/mobile/" + to + ".json")
 		this.http.setRequestHeader("Content-Type", "application/json")
+		this.http.setRequestHeader('Accept','application/json')
 	}
 	
 	sendData(obj) {
