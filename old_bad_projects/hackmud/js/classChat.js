@@ -37,7 +37,7 @@ class Chat {
 	}
 	set state(value) {
 		console.log("Changing state to " + value + ".")
-		console.log(this._.state)
+
 		if (typeof value === "string") {
 			if (this._.state.valid.contains(value.toUpperCase())) {
 				this._.state.current = value.toUpperCase()
