@@ -1,0 +1,36 @@
+@keyframes fade {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.fadein { 
+    animation:         0.25s fade 1s forwards;
+    -o-animation:      0.25s fade 1s forwards;
+    -moz-animation:    0.25s fade 1s forwards;
+    -ms-animation:     0.25s fade 1s forwards;
+    -webkit-animation: 0.25s fade 1s forwards;
+}
+
+body {
+    background-color: #212121;
+}
+
+.text {
+    opacity: 0;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 60px;
+    position: absolute;
+    text-align: center;
+    color: white;
+    -webkit-text-stroke: 3px black;
+}
+
+.center {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    justify-content: center;
+    align-items: flex-end;
+}
