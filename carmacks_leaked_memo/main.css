@@ -1,0 +1,24 @@
+.subtext {
+    color: slategrey;
+    text-decoration: none;
+    margin-left: 20%;
+}
+
+.seventy_five_wide {
+    width: 75%;
+}
+
+.text_center {
+    text-align: center;
+}
+
+.block_center {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.top_margin {
+    margin-top: 5% !important;
+}
