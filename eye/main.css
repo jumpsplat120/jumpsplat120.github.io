@@ -1,0 +1,9 @@
+.stuff {
+  background-image: url("https://i.imgur.com/Ysd3VWD.png");
+  background-size: 1100px;
+  text-align:justify;
+  background-clip: text;
+  color: transparent;
+  line-height: 0.45em;
+  width: 1100px;
+}
