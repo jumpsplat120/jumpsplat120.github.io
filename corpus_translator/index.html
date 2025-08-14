@@ -18,12 +18,22 @@
             u: "u", v: "t", w: "j", x: "ks",
             y: "y", z: "z",
         };
+
+        const special = {
+            corpus: "Yotkuy"
+        }
         
-        document.getElementById("confirm").addEventListener(_ => {
+        document.getElementById("confirm").addEventListener("click", _ => {
+            const words = [];
+            
             let result = "";
             
-            for (const char of input.value.split("")) {
-                result += cipher[char] || char;
+            for (const word of input.value.split(" ")) {
+                words[words.length] = special[word.toLowerCase()] || word;
+            }
+            
+            for (const char of words.join(" ").split("")) {
+                result += cipher[char.toLowerCase()] || char;
             }
 
             output.innerText = result;
