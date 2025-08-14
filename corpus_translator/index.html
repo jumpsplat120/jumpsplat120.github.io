@@ -1,0 +1,32 @@
+<html>
+    <body>
+        <input id="input"></input>
+        <button id="confirm">Translate</button>
+        <div id="output"></div>
+    </body>
+    <script>
+        const input  = document.getElementById("input");
+        const button = document.getElementById("confirm");
+        const output = document.getElementById("output");
+
+        const cipher = {
+            a: "a", b: "t", c: "k", d: "p",
+            e: "e", f: "t", g: "j", h: "k",
+            i: "i", j: "j", k: "k", l: "p",
+            m: "s", n: "t", o: "o", p: "k",
+            q: "r", r: "t", s: "y", t: "p",
+            u: "u", v: "t", w: "j", x: "ks",
+            y: "y", z: "z",
+        };
+        
+        document.getElementById("confirm").addEventListener(_ => {
+            let result = "";
+            
+            for (const char of input.value.split("")) {
+                result += cipher[char] || char;
+            }
+
+            output.innerText = result;
+        })
+    </script>
+</html>
