@@ -1,0 +1,437 @@
+<html>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/dark.min.css">
+    <script type="module">
+    import hljs from "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/es/highlight.min.js";
+    import c from "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/es/languages/c.min.js";
+    hljs.registerLanguage("c", c);
+    hljs.highlightAll();
+    </script>
+    <style>
+        @font-face {
+            font-family: 'white-rabbit';
+            src: url('https://www.jumpsplat120.com/assets/fonts/white_rabbit.woff2') format("woff2"),
+                 url('https://www.jumpsplat120.com/assets/fonts/white_rabbit.woff') format("woff"),
+                 url('https://www.jumpsplat120.com/assets/fonts/white_rabbit.ttf') format("truetype");
+        }
+
+        html {
+        overflow-x: hidden;
+    }
+
+        body {
+            background-color: #101215;
+            background-image: repeating-linear-gradient(180deg, #0e0e0e, #0e0e0e 0.2em, #101215 0.2em, #101215 0.4em);
+            color: #83B0F2;
+            font-family: 'white-rabbit';
+            width: 75%;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex; justify-content: center;
+            flex-direction: column;
+        }
+
+        hr {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        img {
+            align-self: center;
+            object-fit: contain;
+            width: 50%;
+            min-width: 525px;
+        }
+
+        a {
+            color: #1EFF00;
+        }
+
+        blockquote {
+            background-color: rgba(255, 255, 255, 0.10);
+        }
+        .epigraph {
+            width: 75%;
+            align-self: center;
+        }
+
+        .orange {
+            color: #FF8000;
+        }
+
+        .gray {
+            color: #9B9B9B;
+        }
+
+        .green {
+            color: #1EFF00;
+        }
+
+        .pink {
+            color: #FF00EC;
+        }
+    </style>
+    <body>
+        <h1 style="text-align:center">Lua In Hackmud</h1>
+        <h2>Setting The Stage</h2>
+        <div class="epigraph">Without context, you have nothing.</div>
+        <div style="text-align: right;">— Found carved into the foundation of Schwabe in Basel</div>
+        <hr>
+        <p>First, I want to say thank you, whoever you are, for reading my writeup.</p>
+        <p>If you're from hackmud, then I appreciate you taking the time to read this, even if you don't end up running the script.</p>
+        <p>If you're from my Discord, I know this isn't the usual thing I write, but I hope you find it entertaining anyways.</p>
+        <p>If you're a family or a friend, then you've probably heard me yap about this a lot, but hopefully this is a lot more interesting written out.</p>
+        <p>And if you're some stranger who happened to stumble upon this randomly, well, I hope you're not too lost. I'll try to make sure everyone's on the same page before we dive too deep.</p>
+
+        <h3><em>Playing in the mud</em></h3>
+        <p>Hackmud (according to the <a href="https://store.steampowered.com/app/469920/hackmud/">Steam page</a>) is</p>
+        <blockquote cite="https://store.steampowered.com/app/469920/hackmud/">[...] is a retro cyberpunk RPG where you play a digital persona in a chaotic, unpredictable, and often goofy abandoned internet. Enter a 90s hacker movie filled with scripts, scams, and sabotage. Explore the world of digital secrets and forge your legacy through cunning, creativity, or disruption.</blockquote>
+        <p>This insinuates that it plays something along the lines of a a multiplayer <a href="https://store.steampowered.com/app/365450/Hacknet/">Hacknet</a>.</p>
+        <p>In reality, it's more like an interactive fiction with obscure, science fantasy lore contained in multiple stacked puzzle boxes, wrapped in a multiplayer sandbox Javascript environment. You, and all the other players are thrown into this world, and your only goal is to play in whatever manner interests <em>you</em>, specifically.</p>
+        <p>Some users try to piece together the deep, labyrinthian lore into <a href="matr1x-hackmud.github.io">something semi coherent</a>. Some users lean into the role of "big bad" so much that entire game events are created just to <a href="https://www.youtube.com/watch?v=WYw3Ex4vMY8">take you down</a>. Some like to create fun scripts.</p>
+        <p>And some like to create <span class="orange">tools</span>.</p>
+        <h3><em>Written in Javascript</em></h3>
+        <p>It's the language of choice for the game. Even if you've never heard of Javascript, you've used it every day of your life. It underpins the functionality of effectively every website on the internet.</p>
+        <blockquote cite="https://comcode.org/">ComCODE teaches technical and economic literacy through open-ended gameplay. By immersing players in interactive digital ecosystems, ComCODE transforms the gaming experience into an active learning journey, producing real-world skills. </blockquote>
+        <p>If you're making a game with the intent to teach someone a useful language, then choosing one of the most widely used languages in the world is a good choice. It's so popular, in fact, that it's reach has extended to <a href="https://nodejs.org/en">servers</a>, <a href="https://github.com/electron/electron">desktop applications</a>, and even (ironically, and to the dismay of everyone trying to explain the difference between the two languages) inside <a href="https://www.graalvm.org/latest/reference-manual/js/">Java itself</a>.</p>
+        <p>However.</p>
+        <p>I do not like Javascript.</p>
+        <p>This isn't a particularly hot take; I'm not the only one who has this sentiment. Lots of people think Javascript is dumb.<sup>
+            <a href="https://medium.com/@endigo9740/why-javascript-sucks-from-someone-that-loves-it-94d0c5777e42">[1]</a>
+            <a href="https://www.youtube.com/watch?v=Hj2NrDo_NT4">[2]</a>
+            <a href="https://www.boronine.com/2012/12/14/Why-JavaScript-Still-Sucks/">[3]</a>
+            <a href="https://www.youtube.com/watch?v=J6yiNbiiCzA">[4]</a>
+            <a href="https://github.com/denysdovhan/wtfjs">[5]</a>
+            <a href="https://www.destroyallsoftware.com/talks/wat">[6]</a>
+            <a href="https://whydoesitsuck.com/why-does-javascript-suck/">[7]</a>
+        </sup>But hackmud doesn't offer alternatives; if I wanted to write a script — snippets of code that would allow me to interface in the game world — my only choice is Javascript.</p>
+        <p>Sort of.</p>
+        <h3><em>Wha Zum</em></h3>
+        <p>While Javascript is an incredibly popular language, it's not the only coding language out there. Rust, Golang, C++, Java, Haskell, Swift, and Zig, are just a few of the languages someone might code in. And a bunch of <s>nerds</s> very smart people realized that it could be pretty useful if you could take all of the stuff people have written in other languages, and just sort of... jam it on to the browser, somehow.</p>
+        <p>Enter WebAssembly.</p>
+        <p>Web Assembly (or WASM for short (or Web Assembly Sembly Membly for long)) is a "compile target", which just means "where you want to run something". When you wrote a language in C++, if you wanted it to run on Windows, your target for compilation would be Windows. WebAssembly lets you target web browsers specifically, which is a thing most computers have.</p>
+        <p>Lots of cool projects have been written in various compiled languages, including <em>other</em> languages. Javascript (or, at least the engine it runs on) was written in a language. So, theoretically, if you were a crazy insane person with an incredible rack and who played a hacking game but wasn't really vibing with the language of choice, you could use Javascript + WebAssembly to port a C project that was a whole different language.</p>
+        <p>Theoretically.</p>
+        <h2>The Inciting Incident</h2>
+        <div class="epigraph">The journey of a thousand lines of code begins with a single bug.</div>
+        <div style="text-align: right;">— Markus Kane, "Ch. 2: The Weary Coder", <em>Bit by Bit: A History of Computational Infrastructure</em></div>
+        <hr>
+        <p>My language of choice is <a href="https://www.lua.org/">lua</a>. It's a</p>
+        <blockquote cite="https://www.lua.org/about.html">[...] powerful, efficient, lightweight, embeddable scripting language. It supports several programming styles: procedural, object-oriented, functional, data-driven, and data description.</blockquote>
+        <p>What this really means is a 12 year old kid looking to make video games would latch on to this incredibly simple language, and continue to use it sporadically until their 20's, at which point they'd stubbornly attempt to use it in every scenario that involved coding, whether it made sense or not.</p>
+        <p>Coding a Minecraft mod? Let's see if we can use lua. Writing a desktop application? There's probably a library that let's us use lua. Playing a hacking game and not really vibing with the language the developers intended for you to use? Fuck it, let's slam lua into that bitch.</p>
+        <p>And that's what I did!</p>
+        <p>About a year ago.</p>
+        <img src="https://www.jumpsplat120.com/assets/images/discord1.png"
+  alt="Snippet of a Discord message. Jumpsplat120, 11/03/2024, 04:16 AM. Message follows, 'AH YEA BABY HERE WE GO'. An image follows the message, which contains some lua code running within the hackmud CLI. The message continues, 'it's lua in hackmud bby', followed by '@seanmakesgames, This is fine, right?'." />
+        <p>You might be wondering, "Why do a writeup then? Especially now, nearly a full year after you got it working?" Well... I didn't. Not really.</p>
+        <p>You see, I've touched C code — the language that lua is written in — only a handful of time, and honestly? I've hated it every time. Every tutorial assumes you're using 18 quintillion programs I don't have installed, or fail to mention that you need to <a href="https://www.reddit.com/r/VXJunkies/comments/1nm0a35/i_mean_weve_all_been_there_who_hasnt_forgotten_to/">re-polarize the flare reducer on their helium plasma flange</a>, because <em>obviously</em> anyone writing in C already knows to do this one, obvious simple thing.</p>
+        <p>So my process of porting lua involved me haphazardly throwing things at the wall until they'd stick, and then writing as much Javascript and lua code as I could to circumvent all the weird and nasty bugs I created.</p>
+        <img src="https://www.jumpsplat120.com/assets/images/discord2.png"
+  alt="Snippet of a Discord message. Jumpsplat120, 11/03/2024, 07:47 AM. Message follows, 'Well well well'. 'Looks like I don't know what I'm doing 😄'. 'I didn't even think of that tbh'." />
+        <p>But, in some interpretations, it functioned. Enough so that I was able to write 350,000 characters worth of code across over 80 scripts. For comparison, in game, up until quite recently, you started out with the ability to write a single script that had 500 characters. You did, of course, have the ability to gain more character by equipping upgrades, but there was always a limit.</p>
+        <p>With lua, I had no limits.</p>
+        <h3>The limiting factor</h3>
+        <p>A lot of my code was <a href="https://en.wikipedia.org/wiki/Spaghetti_code">spaghetti</a>. Not only was I fighting the character limits in game, but I was also fighting my lack of knowledge of both WASM, and C. As well, the version of Javascript that hackmud uses is stripped down, to prevent sandbox breaks; a lot of the information I'd find online simply wasn't applicable because the environment I was running in didn't have those options.</p>
+        <p>But I was able to work around a lot of the bugs I ran into, which was a good thing, because I really, <em>really</em> didn't want to dive back into the C. In a perfect world, I'd write all my scripts entirely in lua, and forget that there was anything underneath it.</p>
+        <img src="https://www.jumpsplat120.com/assets/images/discord3.png"
+  alt="Snippet of a Discord message. Jumpsplat120, 12/03/2024, 11:30 PM. Message follows, 'sure, but the logic is written in wasm, rather than a a whole seperate language in wasm, and the logic in that language. If I was good at C then I might write stuff in C directly' - the following portion of text is highlighted - 'but just the little bit I had to do to get the interpreter working is enough for the next year of my life, I think. :L'. Well, a year went by. Nailed that one right on the fuckin' head, didn't ya?" />
+        <p>Unfortunately, there was <em>one</em> bug I kept running into. One that was incredibly difficult to nail down, and would pop up at the most inconvenient times in the most inconvenient places. It'd happen once, destroy my database, then not happen again for a week.</p>
+        <p>If I were willing to have my output absolutely flooded with messages every single time I ran something, I might've been able to track it down. But unfortunately, I really didn't wanna. So I didn't. And then, I stopped playing hackmud.</p>
+        <h3><span class="gray">what_is</span>.<span class="green">this</span></h3>
+        <p>Beyond the fact I struggle to stay focused on any one particular game for a <a href="https://en.wikipedia.org/wiki/Attention_deficit_hyperactivity_disorder">long period of time</a>, hackmud as a game also changes pretty slowly. I'd often play for a few months at a time, then play something else for a few months only to slowly drift back.</p>
+        <p>Because of that, one of my side projects in the game was a guide that could be accessed by running a script called <span class="gray">what_is</span>.<span class="green">this</span>. Not only was it for new users, but it was also a tool to refresh myself on things I may have forgotten during our absence.</p>
+        <p>Unlike in C, a lot of my code in lua is usually pretty slick. I've spent a lot of time refining my exact style, and I try to keep to it even if I know no one else is ever going to see it. That being said, because the guide grew a bit out of scope of it's inital premise, the code itself was a bit... wonky.</p>
+        <img src="https://www.jumpsplat120.com/assets/images/discord4.png"
+  alt="Snippet of a Discord message. Jumpsplat120, 20/12/2024, 05:39 AM. Message follows, 'okie dokie well i just spent like 12 hours trying to debug this and at least I kinda probably sort of know how it's failing now. but that's a later me's problem.'" />
+        <p>Upon relaunching the game for the first time in a few months, I decided to clean up the guide; I'd rewrite the logic <em>and</em> write some new articles to fufill some of the requests that had been made during our absence.</p>
+        <p>A day or two went by, and a lot of the work that needed to be done was reformulating old, ad-hoc whateverthefuck into a nice and neat <a href="https://en.wikipedia.org/wiki/Database_schema">schema</a>. It was sort of boring, but there was a sort of satisfaction in it, the same kind one might derive from playing a game like Powerwashing Simulator.</p>
+        <p>Instead of every article just being a big string containing everything I'd want to display, with coloring and what not baked in, I seperated everything out. Each article became the article's data, as well as flags that said whether an article was under construction, or lore heavy, or contained dangerous player scripts. Adding or removing any of these was as easy as changing a <code>true</code> to a <code>false</code>.</p>
+        <p>I even created a system that would handle auto coloring "hyperlinks" — AKA, instead of having to go through all 130+ articles each time I added a new one and change some text from blue to <span class="pink">pink</span>, it'd do it all for me. All I had to do was reupload all the articles, and my new and improved script would be available for everyone to run!</p>
+        <p>Except. I was running into a problem.</p>
+        <img src="https://www.jumpsplat120.com/assets/images/discord5.png"
+  alt="Snippet of a Discord message. Jumpsplat120, 05/10/2025, 03:19 AM. Message follows, 'damn, what_is.this needs to shift. I'm trying to upload the articles, but every rare once in a while, set operation fails, which wipes everything, which is very much not supposed to happen'" />
+        <h2>function 0x1</h2>
+        <div class="epigraph">Electricity flows through veins of silicon, to be manipulated by arcane words. Sounds like magic to me.</div>
+        <div style="text-align: right;">— Cassandra, "Chapter 46: The Magic Touch", <em>Worlds Apart</em></div>
+        <hr>
+        <p>The bug I'd decided to ignore all those months ago was coming back to bite me in the ass right at the finish line. The hard part was already done; all I needed to do was upload some data. But I couldn't get more than 13 or 14 articles in without the whole db wiping.</p>
+        <p>I was not having fun.</p>
+        <p>But, a silver lining. For the first time ever, I was able to consistently recreate the bug, even if the exact process to do so felt a bit... arbitrary.</p>
+        <p>From my experience, what I seemingly needed to do to recreate the bug was</p>
+        <blockquote>[...] to upload 14 articles from a blank db, then, when sys.specs uploads, I have to reupload it again, but by hand (I'm using AHK to speed up the process, but it breaks character encoding on two articles for some reason, so I have to copy paste in a fixed version of the article, which updates the db instead of adding to it), then I have to upload three more articles, and it crashes on the  "upgrade_slots" article</blockquote>
+        <p>Odd, but, doable. So I did it over and over, placing prints in various places to try to determine where exactly the code was failing. Was it on the lua side? Was it on the Javascript side? Was it in <span class="gray">lua54</span>.<span class="green">core</span>? <span class="gray">lua54</span>.<span class="green">exe</span>? <span class="gray">antimony</span>.<span class="green">lib</span>? <span class="gray">aiphos</span>.<span class="green">dencode</span>? Each attempt to find the bug involved a 5 minute setup process, but I was determined to squash this fucker once and for all.</p>
+        <p>And then.</p>
+        <img width="700px" src="https://www.jumpsplat120.com/assets/images/hackmud_bug.png"
+  alt="Two men drawn in a simple, black and white style (referred to as wojacks) pointing at the text 'function 0x1' in some debug output, while staring at the viewer with their mouths hung open." />
+        <img src="https://www.jumpsplat120.com/assets/images/discord6.png"
+  alt="Snippet of a Discord message. Message follows, 'It looks like you ARE a function
+ill be honest tho, i'm not entirely sure what to do with this information
+luaToJS function should never return a function. I don't know where it got it from
+it seems to have just... returned a pointer to the very beginning of the memoryspace? Which kind of sort of makes sense?
+but also not really at all
+the luaToJS function was written in C. I don't remember what it does 😭
+hopefully the error is on the JS side'" />
+        <h3>Speedrunning the five stages</h3>
+        <img src="https://www.jumpsplat120.com/assets/images/discord7.png"
+  alt="Jumpsplat120, 05/10/2025, 06:19 AM. Snippet of a Discord message. Message follows, 'nooooo it's not
+the call never reached the JS
+I knew my janky C would bite me in the ass one day'" />
+    <p>Straight to acceptance. See, I knew that my code was built on a house of cards the whole time, and I think I'd always sort of been waiting for the other shoe to drop. In fact, I never really stopped patching bugs, and I was confident this would be another quick fix. I wasn't looking forward to fixing the C code, but at least I could-</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord8.png"
+  alt="Jumpsplat120, 05/10/2025, 06:57 AM. Snippet of a Discord message. Message follows, 'oh noooo I can't even find the original project
+and I didn't upload it to GitHub either??? 😭
+I hope there's still some way to solve this that doesn't involve having to rewrite the whole thing from scratch
+it was a bodge, but it was a working bodge! until now, at least 😅
+' Spoiler warning, but we wouldn't be doing a write up if we could've bodged another fix." />
+    <p>Ah.</p>
+    <p>Okay, that's... not great. I hated having to crawl into bed on that note, but tomorrow I-</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord9.png"
+  alt="Jumpsplat120, 05/10/2025, 07:47 AM. Snippet of a Discord message. Message follows, 'I FOUND IT
+(I didn't go to bed)'" />
+    <img src="https://www.jumpsplat120.com/assets/images/old_c_code.png"
+  alt="Snippet of C code. The function is called 'luatojs'. It runs a function called 'emscripten_run_script_string', which takes input from another function called 'argbuilder', and get's a void pointer in response. That void pointer gets turned into a character pointer called 'str'. The first index of str is checked for the number 1, 2, or 3, and it's converted to a boolean, a number, or a string respectively. Finally, it returns the number 1." />
+    <p>Alright, we didn't go to bed. I was a little too focused on the problem. But my code was creating a pointer to a function at memory address <code>0x1</code>, and luatojs was returning literally the number 1. I wasn't sure what that meant, or what to do with that info, but it felt like progress.</p>
+    <p>I had a starting point.</p>
+    <h3>Dream logic</h3>
+    <p>An answer wasn't revealed to me while we slept, unfortunately, but regardless, a few hours after waking I had a theory I felt confident about. My <a href="https://en.wikipedia.org/wiki/Cargo_cult_programming">cargo cult-esque</a> methods of uploading articles was uneeded; I believed that the problem would arise from any big enough chunk of data that got passed back and forth. And a few minutes of testing corroborated that theory.</p>
+    <p>If that was the problem, then all I had to do was increase the size of the memoryspace I was working in.</p>
+    <p>Unfortunately, to do that, I'd need to dive back into the C code.</p>
+    <p>Now, those of you out there who know WASM might be confused by this. "Couldn't you just run <a href="https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/JavaScript_interface/Memory/grow">Memory.grow()</a>?", you may ask. And, had I written my inital port correctly, then yes, that's all I would've needed to do.</p>
+    <p>In fact, if it'd been written correctly, emscripten (the specific compiler I was using) would've handled that for me. Memory management shouldn't have been something I'd need to worry about at all. But I didn't write it correctly.</p>
+    <p>You see, I had a vague understanding of how to put something into memory and have the C code read it, but at the time, I wasn't quite able to figure out how to tell either the Javascript or C code where to read from. My strategy of hijacking the functionality of <code>emscripten_run_script_string</code> meant that I just didn't have access to the memory pointers (the location in memory where my data was).</p>
+    <p>Had I been using <code>emscripten_run_script_string</code> correctly, that wouldn't have been a problem. It's true purpose is to take a string from C, and <code>eval</code> it in Javascript, and to then send the result back as a string. But hackmud doesn't have <code>eval</code>, and so I had to write my own interpretation of <code>emscripten_run_script_string</code>, and effectively, I was using a screwdriver as a hammer.</p>
+    <p>As well, my method of building a string on the C side never called <code>malloc</code> or <code>free</code>; the functions provided by C to allocate memory, or free the allocated memory. C didn't realize the memory I was using was being used, because I never told it I was using it. Javascript didn't know, because C never told it.</p>
+    <p>This was fine... for small chunks of data. But for a big chunk of data (say, 20 or so articles poorly encoded into a megasuper string), it would simply overflow. Javascript would fail to parse it, and C would get a response that didn't have a 1, 2, or 3 as the first byte. Instead of putting a boolean, a number, or a string onto the lua stack, I was getting the return value instead.</p>
+    <p>A single number 1, interpreted as a memory address for a function.</p>
+    <p>function 0x1.</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord10.png"
+  alt="Jumpsplat120, 05/10/2025, 07:41 PM. Snippet of a Discord message. Message follows, 'Yeahhhhh, I knew I'd have to do this some day. I need to rewrite this spaghetti'" />
+    <h2>luaparse</h2>
+    <div class="epigraph">Just break it down to it's fundamentals. They're just puzzle pieces.</div>
+    <div style="text-align: right;">— 13-A, "Chapter 33: Atomic Operation", <em>The Hundred Year Trip</em></div>
+    <hr>
+    <p>I didn't want to dive back into the C.</p>
+    <p>I really didn't want to.</p>
+    <p>So instead, I decided that I'd rewrite lua in it's entirety, using a <a href="https://github.com/fstirlitz/luaparse">luaparser</a> written in Javascript. The parser didn't do any of the logic of lua, it would simply read through a string, and break it down into it's component pieces for me.</p>
+    <p>An assignment operation. Addition. Subtraction. A function call.</p>
+    <p>I figured, all I had to do was read through the output, and do each operation as I came upon it. Each one was an instruction that I'd simply translate by hand in lua. There was even already a project that did <a href="github.com/fengari-lua/fengari">something like that</a>, although I wasn't able to port it due to it's size and complexity.</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord11.png"
+  alt="Conversation between progamer937 and Jumpsplat120. 05/10/2025, 11:26 PM. Snippet of a Discord message. Message follows, 'progamer937 - wtf
+jumpsplat120 - 'this'll be great and super easy' they lied to themselves
+progamer937 - why
+jumpsplat120 - cause I can't figure out the memory allocation bug in my original wasm implementation'" />
+    <p>I felt confident about this.</p>
+    <h2>The Hard Way</h2>
+    <div class="epigraph">There's no cheat for this stuff. If you wanna cut down a demon, you need to sharpen your damn sword! Fancy footwork ain't gonna work; you need to put in the time at the grindstone.</div>
+    <div style="text-align: right;">— Sir Wyanan, "Chapter 12: Wet and Dead", <em>The Moonlit Empire - Book 3: Red Horizon</em></div>
+    <hr>
+    <img src="https://www.jumpsplat120.com/assets/images/discord12.png"
+  alt="Jumpsplat120, 06/10/2025, 05:00 AM. Snippet of a Discord message. Message follows, 'Okay im not doing the parser thing.'" />
+    <p>It took nearly a full day for me to come to terms with it. The parser was not an easier solution. Fengari wouldn't work. There were no other implementations that would let me avoid this.</p>
+    <p>If I wanted lua in hackmud, I needed to fix my bug, and if I wanted to fix my bug, I needed to dive back into the C code.</p>
+    <h3>First principles</h3>
+    <p>To understand the bug well enough to fix it, I'd need to actually understand my C code. And to do that, I'd need to relearn WASM and emscripten. So I began pouring through documentation.</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord13.png"
+  alt="Conversation between BigDaddyK and Jumpsplat120, 06/10/2025, 05:36 PM. Snippet of a Discord message. Message follows, 'fkn feel like my brain has the capacity of a wet tissue paper sometimes.' Jumpsplat120 replies with 'Me rn when scanning emscripten's documentation'" />
+    <p>Documentation <em>can</em> be satisfying to read through, sometimes. Clear examples, an easy to navigate site, and a logical layout can all lend itself to a pleasant learning experience.</p>
+    <p>Emscripten is not that.</p>
+    <p>Their examples are lacking, when they even bother to have any. There's no flow to the documentation, meaning it's a pain in the ass to find where they may have written information on any one particular subject. The website is bloated with only tangetially related information, as though someone was using it as a dumping ground for anything that might possibly come up some day.</p>
+    <p>Overall, I wasn't enjoying my time there. But with the docs, as well as random piecemeal tutorials for semi related subjects, I <em>was</em> making progress. And <s>10</s> <s>20</s> 47 tabs later, I managed to write a new <code>interpret</code> function, one that I felt made much more sense than the previous one.</p>
+    <pre>
+        <code class="language-c">
+//Take a string from lua, and run it in JS, then take the result from JS, and pass it back to lua.
+int lua_tojs(lua_State *L) {
+    if (!lua_istable(L, -1)) {
+        return luaL_error(L, "Value provided to lua_tojs was not of type 'table'.");
+    }
+    
+    //Get the size of the table.
+    const lua_Unsigned len = lua_rawlen(L, -1);
+    
+    //Allocate memory for the table. It should contain lua_Numbers, which are doubles (usually).
+    int *values = malloc(len * sizeof(lua_Number));
+
+    //If we fail to allocate, we throw a lua error, which is then handled by JS.
+    if (values == NULL) {
+        return luaL_error(L, "Size of table is too large for WASM instance. Failed to allocate memory.");
+    }
+
+    //Iterate through the table, pulling out all of the numbers.
+    for (int i = 0; i <= len; i++) {
+        //Take the value of our table (always at -1) and get the value at the index
+        //i + 1 (for 1-indexing). Our table gets pushed down at the same when we add
+        //the value from the table to the top of the stack, but then we pop it, which
+        //moves our table back up to the top.
+        lua_rawgeti(L, -1, i + 1);
+
+        //If it's not a number, free the space we allocated before throwing.
+        if (!lua_isnumber(L, -1)) {
+            free(values);
+
+            return luaL_error(L, "Value in table for lua_tojs was not of type 'number'.");
+        }
+
+        //Our value is now at the top of the stack. We get it, place it in our array,
+        //and then remove it from the top of the stack.
+        values[i] = luaL_checknumber(L, -1);
+        
+        //lua_pop removes n items, not item n.
+        lua_pop(L, 1);
+    }
+
+    //Pass in the pointer to our array. JS reads it, then spits back out another pointer
+    //to a new set of data, which we place back into lua to be processed. C doesn't do anything
+    //other than verifying types.
+    const int *result = read_data(values);
+    
+    //Once JS has finished reading our values, we can free that memory.
+    free(values);
+
+    //We don't know how long our new table is, so we're going to have to iterate over it with
+    //a while loop until we find our termination pattern (\0\0\0\0). We create our i variable
+    //outside of the loop, and create a new table to begin pushing values into.
+    int i = 0;
+    int termination = 0;
+
+    lua_newtable(L);
+    
+    while (1>0) {
+        //Increment out termination counter if we keep finding consecutive zeros.
+        //Reset it if we find anything else.
+        if (result[i] == 0) {
+            termination++;
+        } else {
+            termination = 0;
+        }
+
+        //If we found four 0's in a row, then we are all done. We can stop looping and return
+        //to lua.
+        if (termination == 4) {
+            break;
+        }
+
+        //Add our current number to the top of the stack.
+        lua_pushnumber(L, result[i]);
+
+        //Take the value at the top of the stack, and put into our table, which is below it.
+        //We +1, because lua is 1-indexed, and rawseti pops the value we just pushed, which
+        //was at the top. This moves our table back up, ready for another push.
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
+}
+
+//exported function. Give it a string (our lua code), and interpret it.
+//When successful, returns 1.
+int interpret(const char* string) {
+    int status, result;
+
+    lua_State *L = luaL_newstate();
+    
+    //Failed to create a luastate.
+    if (L == NULL) return -1;
+
+    luaL_openlibs(L);
+
+    //the luatojs function is what lets us call out from lua back to js,
+    //while still in the middle of our lua.
+    lua_pushcfunction(L, lua_tojs);
+    lua_setglobal(L, "luaToJS");
+    lua_gc(L, LUA_GCSTOP);
+    luaL_dostring(L, string);
+    lua_close(L);
+
+    return 1;
+}
+        </code>
+    </pre>
+    <p>For those of you who have no idea what they're looking at, let me break it down for you. (And for those of you who <em>do</em> know what they're looking at are and looking to copy paste it for some reason, know that this is <em>old, not working code!</em>)</p>
+    <p>Rather than taking my data from lua, converting it into a bytes, turning those bytes into a string, then sending that to Javascript, I was skipping the string part entirely. Instead, I was giving C an array (a sequential list) of bytes, and sending that straight over to Javascript. Javascript would decode it, do whatever it needed to, and send the data back.</p>
+    <p>I felt it was elegant. It was similar to my old method, but I was saving a step. Previously, if I wanted to send over the number 12, I'd need to create a string, append the string with 3 (my "identification" byte), then convert the 12 into a string (because I could only send strings back and forth), then undo the whole process.</p>
+    <p>Now if I wanted to send 12, I'd send 2 (my new "indentification" byte), then I'd send 12.</p>
+    <p>That's it.</p>
+    <p>All I had to do now was write an encoder and decoder for both Javascript and lua. And since I wanted to keep things consistant, I'd write a single encoder and decoder, and try to make both languages do as close to the same thing as possible, so that it would be easy to debug.</p>
+    <p>I was thinking ahead. Consistant behavior on both ends, and a lack of failure points meant that this would be a walk in the park.</p>
+    <h3>The park is on fire</h3>
+    <img src="https://www.jumpsplat120.com/assets/images/discord14.png"
+  alt="Jumpsplat120, 07/10/2025, 03:06 AM. Snippet of a Discord message. Message follows, 'lua update: The C code is running. The lua... not so much.'" />
+    <p>It wasn't <em>not</em> working, but it definitely wasn't functional. I couldn't tell why, either; it simply seemed to do nothing, rather than run any lua code I provided it. Annoying, mainly because diagnosing a <em>lack</em> of an error is a lot harder than diagnosing with one.</p>
+    <p>Still, having a semi working implementation was satisfying, and without the nightmarish, unintenitonally obfuscated code I'd had before due to the lack of character upgrades, it was a lot easier to keep track of the logic.</p>
+    <p>You see, since my last attempt, there had been an update in hackmud that changed the default amount of characters in a script from 500 to 2000. As well, I had moved everything over to a user specifically created for this purpose, which meant it had lots of character count upgrades.</p>
+    <p>I had nearly 10 thousand characters to play with, instead of a measly 2000 or so. And by the time the project was finished, I had upgraded it to 18 thousand characters.</p>
+    <p>My sandbox huge, and I was building one hell of a sand castle.</p>
+    <p>Well, once I sorted this bug.</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord15.png"
+  alt="Jumpsplat120, 07/10/2025, 07:23 AM. Snippet of a Discord message. Message follows, 'I feel like I'm going crazy lol. my JS is calling the C function, and I feel like it's getting a pointer to the string, but it doesn't seem to be running it, or if it is, it doesn't seem to be throwing an error in the same way I think it's supposed to. idk what's happening lol'" />
+    <p>On the C side, lua works as a stack based system; stuff goes onto the stack, you run one of the lua C functions, and lua takes stuff off the top.</p>
+    <p>So, to call a <code>my_function</code> in lua with two arguments, I'd first push the name of the function, then argument 1, then argument 2. Then I run it, and it pulls everything off the stack, and puts my results onto the stack.</p>
+    <p>So, to get the values from running <code>lua_tojs</code>, I needed to first open up the table I provided it, then take each number and put it into an array that I could send to Javascript. But I couldn't. For some reason, I was running into an error.</p>
+    <p>Over, and over, and <em>over</em> I tried things. I reread the lua documentation. I started at my C function. I was so <em>sure</em> that I was pulling items correctly, but every time I tried it, an error would pop up saying that I was passing <code>nil</code> (lua's version of a "nothing" value).</p>
+    <p>I defintely wasn't making an empty table, so where were the numbers going? Was I looking in the wrong place?</p>
+    <p><em>What? Was? <b>Happening?</b></em></p>
+    <h2>AAAAAAAAAAAAAAAAAAAAAAAAA</h2>
+    <div class="epigraph">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
+    <div style="text-align: right;">— AAAAAAAAAAAAAAAAAAAAAAAAA, "AAAAAAAAAAAAAAAAAAAAAAAAA", <em>AAAAAAAAAAAAAAAAAAAAAAAAA</em></div>
+    <hr>
+    <img src="https://www.jumpsplat120.com/assets/images/discord16.png"
+  alt="Jumpsplat120, 08/10/2025, 12:33 AM. Snippet of a Discord message. In large, bold, italicized font is the letter A repeated over and over." />
+    <h2>Flow State</h2>
+    <div class="epigraph">When the stars align, when your hand is on the controls and you have the infinite black in front of you, it'll just... click.</div>
+    <div style="text-align: right;">— Lenzo Tisin, "Chapter 66: Like Riding a Bike", <em>Starfighter</em></div>
+    <hr>
+    <p>The keen eyed among you may have noticed an issue in the C code I posted above. Generally, a for loop is</p>
+    <pre><code>for (int i = 0; i < length_of_thing; i++)</code></pre>
+    <p>However long your thing is, you check if <code>i</code> is less than that thing. If I have 5 items, then <code>i</code> will count up by 1, starting from 0.</p>
+    <p>0, 1, 2, 3, 4.</p>
+    <p>That's five numbers right there.</p>
+    <p><code>i</code> starts at 0, and ends 1 under whatever I'm counting. Four is less than five. Five is <em>not</em> less than five.</p>
+    <p>But what if I wrote <code>&lt;=</code> instead? Well, then I'd do one extra loop, of course. Except, there'd be no sixth item to grab.</p>
+    <p>Or, you might say that the sixth item... is <em>nil</em>.</p>
+    <p>This stupid little piece of shit equal sign wasted over 16 real life hours. I hadn't thought to check the for loop because, well, I've written hundreds- no, <em>thousands</em> of for loops in my life. Why would I double check something so simple?</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord17.png"
+  alt="Discord conversation with three members, 08/10/2025, 12:34 AM. Message from Fayti1703 '...oh shit, I totally missed that during the review'. Jumpsplat120 responds 'yeah, so did I lol'. southr6 replies to the inital all caps message with 'Yeah, that tracks.'" />
+    <p>I... was at a loss for words.</p>
+    <p>Literally. I screamed so loudly when I found out that I actually lost my voice slightly the following day.</p>
+    <p>But, as frustrating as it was to realize that I'd been so thoroughly conquered by a math symbol, it meant I was able to continue forging forward.</p>
+    <p>And forge I did.</p>
+    <p>Running into an out of memory error from lua? It's an issue with my decoder. Fixed.</p>
+    <p>I'm reading arbitrary sections of memory? Turns out I'm freeing the same chunk of memory twice. Fixed.</p>
+    <p>Every problem I encountered, I'd find a solution within the hour. And even if I couldn't, I always had something to try. I never hit a wall. My fingers were flying across the keyboard, and I was truely and utterly <em>locked in</em>.</p>
+    <p>And then.</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord18.png"
+  alt="Snippet from Discord. Message follows 'FOLKS it works
+I just gotta clean up all these debug statements and rebuild the C (cause there's a pretty obnxious print statement in there)
+But other than that?? We freakin did it
+(again) 
+Oh, I guess I need to rewrite the handler logic as well, for converting arbitrary data types to/from JS/lua
+but thats the ez part 😅'" />
+    <p>On the downside, I'd be unable to use pretty much any of the code I had originally been using, since it was all bespoke. But the upside meant that my new translation code would be easy to write and easy to debug, and also not hurt to look at.</p>
+    <h3>Rosetta stone</h3>
+    <p>The translation process was nearly painless. There was a minor hiccup when I realized that Javascript would automatically convert all keys in an object to strings (lua doesn't do this), which meant that what came back didn't match what I sent, but eventually I realized that didn't actually matter.</p>
+    <p>As nice as it'd be to ignore the Javascript underneath the lua, I couldn't ever fully forget it. That's the engine game scripts run in. If I wanted to play in a puzzle, or save things in the database, I would always need to be aware of that fact.</p>
+    <p>And so it went.</p>
+    <p>I also needed to write some special handler code for certain, hackmud specific features, but due to the extensible way I was writing the decoder, all I'd need to do would be to add another "action" to my list of "actions".</p>
+    <p>Am I trying to run a Javascript function from lua? Action 3.</p>
+    <p>Am I trying to run save something to the database? Action 7.</p>
+    <p>Each new feature was an if check, and a few lines of code. And with the heavy, <em>heavy</em> commenting, I'd never run into another case of trying to piece apart the logic of a Nova from yesteryear.</p>
+    <p>I did get a little distracted adding some bells and whistles that weren't really needed, but after a handful more days, I finally finished it. <span class="gray">lua54</span>.<span class="green">exe</span> was open for business.</p>
+    <img src="https://www.jumpsplat120.com/assets/images/discord19.png"
+  alt="Jumpsplat120, 11/10/2025, 06:20 AM. Snippet from Discord. Message follows 'hmm, starting off strong with my error threw an error'" />
+    <p>Kind of.</p>
+    <h2>10000 Grit</h2>
+    <div class="epigraph">Ha! You think you're finished? You think you'll ever be finished?! What are these cast off shades of humanity, but the final impulse of perfection refusing to let go of an impossible task? We'll be here until the stars burn out, and then we'll simply toil in the dark.</div>
+    <div style="text-align: right;">— Unnamed Shade, "Chapter 66: Invisible Chains", <em>Ain't No Rest</em></div>
+    <hr>
+    <p>Bugs happen. Bugs will likely <em>keep</em> happening. This write up could easily be another five to ten chapters of every new hurdle I encountered and surmounted, but when it comes down to it, I <em>did</em>. I surmounted each and every one, and I'll continue to do so.</p>
+    <p>You might ask why there's anything left to surmount? Surely, the code is now running. What is there to fix? Well, like any artist with their art, I can't help but to desire to improve it. I want to make it better.</p>
+    <p>Faster.</p>
+    <p>More robust.</p>
+    <p>But at the end of the day, what I set out to do, I accomplished. As much as I dreaded the task of reimplementing my port of lua into hackmud, I still did it. My code is on <a href="https://github.com/jumpsplat120/lua-in-hackmud">Github</a> if you'd like to take a look.</p>
+    <p>And maybe in another year, there will be a write up about how my old code was a joke; infantile, overengineered crap that any old shmuck could make. I know I ragged a bunch on my previous implementation, but that's progress. Ever improving, ever growing.</p>
+    <p>But for now, I can confidentally say: I'm proud of what I've done here.</p>
+    <p>And with that, I'm off to go gamble at <span class="gray">zac</span>.<span class="green">casino</span> with a bunnybat in my lap, confident that my upgrades are safe because I use <span class="gray">xena</span>.<span class="green">defender</span>.</p>
+    <br>
+    <p>All through lua, of course.</p>
+    </body>
+</html>
