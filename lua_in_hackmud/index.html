@@ -124,7 +124,7 @@
         <img src="https://www.jumpsplat120.com/assets/images/discord1.png"
   alt="Snippet of a Discord message. Jumpsplat120, 11/03/2024, 04:16 AM. Message follows, 'AH YEA BABY HERE WE GO'. An image follows the message, which contains some lua code running within the hackmud CLI. The message continues, 'it's lua in hackmud bby', followed by '@seanmakesgames, This is fine, right?'." />
         <p>You might be wondering, "Why do a writeup then? Especially now, nearly a full year after you got it working?" Well... I didn't. Not really.</p>
-        <p>You see, I've touched C code — the language that lua is written in — only a handful of time, and honestly? I've hated it every time. Every tutorial assumes you're using 18 quintillion programs I don't have installed, or fail to mention that you need to <a href="https://www.reddit.com/r/VXJunkies/comments/1nm0a35/i_mean_weve_all_been_there_who_hasnt_forgotten_to/">re-polarize the flare reducer on their helium plasma flange</a>, because <em>obviously</em> anyone writing in C already knows to do this one, obvious simple thing.</p>
+        <p>You see, I've touched C code — the language that lua is written in — only a handful of times, and honestly? I've hated it every time. Every tutorial assumes you're using 18 quintillion programs I don't have installed, or fail to mention that you need to <a href="https://www.reddit.com/r/VXJunkies/comments/1nm0a35/i_mean_weve_all_been_there_who_hasnt_forgotten_to/">re-polarize the flare reducer on their helium plasma flange</a>, because <em>obviously</em> anyone writing in C already knows to do this one, obvious simple thing.</p>
         <p>So my process of porting lua involved me haphazardly throwing things at the wall until they'd stick, and then writing as much Javascript and lua code as I could to circumvent all the weird and nasty bugs I created.</p>
         <img src="https://www.jumpsplat120.com/assets/images/discord2.png"
   alt="Snippet of a Discord message. Jumpsplat120, 11/03/2024, 07:47 AM. Message follows, 'Well well well'. 'Looks like I don't know what I'm doing 😄'. 'I didn't even think of that tbh'." />
@@ -214,7 +214,7 @@ it was a bodge, but it was a working bodge! until now, at least 😅
     <p>I really didn't want to.</p>
     <p>So instead, I decided that I'd rewrite lua in it's entirety, using a <a href="https://github.com/fstirlitz/luaparse">luaparser</a> written in Javascript. The parser didn't do any of the logic of lua, it would simply read through a string, and break it down into it's component pieces for me.</p>
     <p>An assignment operation. Addition. Subtraction. A function call.</p>
-    <p>I figured, all I had to do was read through the output, and do each operation as I came upon it. Each one was an instruction that I'd simply translate by hand in lua. There was even already a project that did <a href="github.com/fengari-lua/fengari">something like that</a>, although I wasn't able to port it due to it's size and complexity.</p>
+    <p>I figured, all I had to do was read through the output, and do each operation as I came upon it. Each one was an instruction that I'd simply translate by hand in Javascript. There was even already a project that did <a href="github.com/fengari-lua/fengari">something like that</a>, although I wasn't able to port it due to it's size and complexity.</p>
     <img src="https://www.jumpsplat120.com/assets/images/discord11.png"
   alt="Conversation between progamer937 and Jumpsplat120. 05/10/2025, 11:26 PM. Snippet of a Discord message. Message follows, 'progamer937 - wtf
 jumpsplat120 - 'this'll be great and super easy' they lied to themselves
@@ -356,7 +356,7 @@ int interpret(const char* string) {
     <h3>The park is on fire</h3>
     <img src="https://www.jumpsplat120.com/assets/images/discord14.png"
   alt="Jumpsplat120, 07/10/2025, 03:06 AM. Snippet of a Discord message. Message follows, 'lua update: The C code is running. The lua... not so much.'" />
-    <p>It wasn't <em>not</em> working, but it definitely wasn't functional. I couldn't tell why, either; it simply seemed to do nothing, rather than run any lua code I provided it. Annoying, mainly because diagnosing a <em>lack</em> of an error is a lot harder than diagnosing with one.</p>
+    <p>It wasn't <em>not</em> working, per say, but it definitely wasn't <b>functional</b>. I couldn't tell why, either; it simply seemed to do nothing, rather than run any lua code I provided it. Annoying, mainly because diagnosing a <em>lack</em> of an error is a lot harder than diagnosing with one.</p>
     <p>Still, having a semi working implementation was satisfying, and without the nightmarish, unintenitonally obfuscated code I'd had before due to the lack of character upgrades, it was a lot easier to keep track of the logic.</p>
     <p>You see, since my last attempt, there had been an update in hackmud that changed the default amount of characters in a script from 500 to 2000. As well, I had moved everything over to a user specifically created for this purpose, which meant it had lots of character count upgrades.</p>
     <p>I had nearly 10 thousand characters to play with, instead of a measly 2000 or so. And by the time the project was finished, I had upgraded it to 18 thousand characters.</p>
@@ -365,13 +365,13 @@ int interpret(const char* string) {
     <img src="https://www.jumpsplat120.com/assets/images/discord15.png"
   alt="Jumpsplat120, 07/10/2025, 07:23 AM. Snippet of a Discord message. Message follows, 'I feel like I'm going crazy lol. my JS is calling the C function, and I feel like it's getting a pointer to the string, but it doesn't seem to be running it, or if it is, it doesn't seem to be throwing an error in the same way I think it's supposed to. idk what's happening lol'" />
     <p>On the C side, lua works as a stack based system; stuff goes onto the stack, you run one of the lua C functions, and lua takes stuff off the top.</p>
-    <p>So, to call a <code>my_function</code> in lua with two arguments, I'd first push the name of the function, then argument 1, then argument 2. Then I run it, and it pulls everything off the stack, and puts my results onto the stack.</p>
+    <p>So, if I wanted to call <code>my_function</code> in lua with two arguments, I'd first push the name of the function, then argument 1, then argument 2. Then I run it, and it pulls everything off the stack, and puts my results onto the stack.</p>
     <p>So, to get the values from running <code>lua_tojs</code>, I needed to first open up the table I provided it, then take each number and put it into an array that I could send to Javascript. But I couldn't. For some reason, I was running into an error.</p>
     <p>Over, and over, and <em>over</em> I tried things. I reread the lua documentation. I started at my C function. I was so <em>sure</em> that I was pulling items correctly, but every time I tried it, an error would pop up saying that I was passing <code>nil</code> (lua's version of a "nothing" value).</p>
     <p>I defintely wasn't making an empty table, so where were the numbers going? Was I looking in the wrong place?</p>
     <p><em>What? Was? <b>Happening?</b></em></p>
     <h2>AAAAAAAAAAAAAAAAAAAAAAAAA</h2>
-    <div class="epigraph">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
+    <div class="epigraph">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
     <div style="text-align: right;">— AAAAAAAAAAAAAAAAAAAAAAAAA, "AAAAAAAAAAAAAAAAAAAAAAAAA", <em>AAAAAAAAAAAAAAAAAAAAAAAAA</em></div>
     <hr>
     <img src="https://www.jumpsplat120.com/assets/images/discord16.png"
@@ -409,7 +409,7 @@ but thats the ez part 😅'" />
     <p>On the downside, I'd be unable to use pretty much any of the code I had originally been using, since it was all bespoke. But the upside meant that my new translation code would be easy to write and easy to debug, and also not hurt to look at.</p>
     <h3>Rosetta stone</h3>
     <p>The translation process was nearly painless. There was a minor hiccup when I realized that Javascript would automatically convert all keys in an object to strings (lua doesn't do this), which meant that what came back didn't match what I sent, but eventually I realized that didn't actually matter.</p>
-    <p>As nice as it'd be to ignore the Javascript underneath the lua, I couldn't ever fully forget it. That's the engine game scripts run in. If I wanted to play in a puzzle, or save things in the database, I would always need to be aware of that fact.</p>
+    <p>As nice as it'd be to ignore the Javascript underneath the lua, I couldn't ever fully forget it. That's the language game scripts run in. If I wanted to play in a puzzle, or save things in the database, I would always need to be aware of that fact.</p>
     <p>And so it went.</p>
     <p>I also needed to write some special handler code for certain, hackmud specific features, but due to the extensible way I was writing the decoder, all I'd need to do would be to add another "action" to my list of "actions".</p>
     <p>Am I trying to run a Javascript function from lua? Action 3.</p>
