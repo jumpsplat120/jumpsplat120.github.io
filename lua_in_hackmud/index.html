@@ -72,6 +72,7 @@
     </style>
     <body>
         <h1 style="text-align:center">Lua In Hackmud</h1>
+        <h3 style="float: right;">October 14th, 2025</h3>
         <h2>Setting The Stage</h2>
         <div class="epigraph">Without context, you have nothing.</div>
         <div style="text-align: right;">— Found carved into the foundation of Schwabe in Basel</div>
@@ -87,7 +88,7 @@
         <blockquote cite="https://store.steampowered.com/app/469920/hackmud/">[...] is a retro cyberpunk RPG where you play a digital persona in a chaotic, unpredictable, and often goofy abandoned internet. Enter a 90s hacker movie filled with scripts, scams, and sabotage. Explore the world of digital secrets and forge your legacy through cunning, creativity, or disruption.</blockquote>
         <p>This insinuates that it plays something along the lines of a a multiplayer <a href="https://store.steampowered.com/app/365450/Hacknet/">Hacknet</a>.</p>
         <p>In reality, it's more like an interactive fiction with obscure, science fantasy lore contained in multiple stacked puzzle boxes, wrapped in a multiplayer sandbox Javascript environment. You, and all the other players are thrown into this world, and your only goal is to play in whatever manner interests <em>you</em>, specifically.</p>
-        <p>Some users try to piece together the deep, labyrinthian lore into <a href="https://www.matr1x-hackmud.github.io/">something semi coherent</a>. Some users lean into the role of "big bad" so much that entire game events are created just to <a href="https://www.youtube.com/watch?v=WYw3Ex4vMY8">take you down</a>. Some like to create fun scripts.</p>
+        <p>Some users try to piece together the deep, labyrinthian lore into <a href="https://matr1x-hackmud.github.io/">something semi coherent</a>. Some users lean into the role of "big bad" so much that entire game events are created just to <a href="https://www.youtube.com/watch?v=WYw3Ex4vMY8">take you down</a>. Some like to create fun scripts.</p>
         <p>And some like to create <span class="orange">tools</span>.</p>
         <h3><em>Written in Javascript</em></h3>
         <p>It's the language of choice for the game. Even if you've never heard of Javascript, you've used it every day of your life. It underpins the functionality of effectively every website on the internet.</p>
@@ -214,7 +215,7 @@ it was a bodge, but it was a working bodge! until now, at least 😅
     <p>I really didn't want to.</p>
     <p>So instead, I decided that I'd rewrite lua in it's entirety, using a <a href="https://github.com/fstirlitz/luaparse">luaparser</a> written in Javascript. The parser didn't do any of the logic of lua, it would simply read through a string, and break it down into it's component pieces for me.</p>
     <p>An assignment operation. Addition. Subtraction. A function call.</p>
-    <p>I figured, all I had to do was read through the output, and do each operation as I came upon it. Each one was an instruction that I'd simply translate by hand in Javascript. There was even already a project that did <a href="github.com/fengari-lua/fengari">something like that</a>, although I wasn't able to port it due to it's size and complexity.</p>
+    <p>I figured, all I had to do was read through the output, and do each operation as I came upon it. Each one was an instruction that I'd simply translate by hand in Javascript. There was even already a project that did <a href="https://github.com/fengari-lua/fengari">something like that</a>, although I wasn't able to port it due to it's size and complexity.</p>
     <img src="https://www.jumpsplat120.com/assets/images/discord11.png"
   alt="Conversation between progamer937 and Jumpsplat120. 05/10/2025, 11:26 PM. Snippet of a Discord message. Message follows, 'progamer937 - wtf
 jumpsplat120 - 'this'll be great and super easy' they lied to themselves
