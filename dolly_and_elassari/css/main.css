@@ -1,0 +1,24 @@
+body {
+    color: #ffffff;
+    background-color: #000000;
+}
+
+.npc {
+    color: #ffff9f;
+}
+
+.ooc {
+    color: #808080;
+}
+
+.user {
+    color: #8788ee;
+}
+
+.emote {
+    color: #ff8040;
+}
+
+.timestamp {
+    color: #878787;
+}
